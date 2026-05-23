@@ -1,0 +1,73 @@
+name: starter-kit
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: deploy/php/Dockerfile
+    container_name: starterkit_app
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+    depends_on:
+      - mysql
+      - redis
+    networks: [starterkit]
+    environment:
+      PHP_OPCACHE_VALIDATE_TIMESTAMPS: "1"
+      PHP_OPCACHE_MEMORY_CONSUMPTION: "256"
+      PHP_OPCACHE_MAX_ACCELERATED_FILES: "20000"
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: starterkit_nginx
+    ports: ["8080:80"]
+    volumes:
+      - ./:/var/www/html
+      - ./deploy/nginx/site.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on: [app]
+    networks: [starterkit]
+
+  mysql:
+    image: mysql:8.0
+    container_name: starterkit_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: starter_kit
+      MYSQL_USER: starter
+      MYSQL_PASSWORD: starter
+      MYSQL_ROOT_PASSWORD: root
+    ports: ["3307:3306"]
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks: [starterkit]
+    command: --default-authentication-plugin=caching_sha2_password
+
+  redis:
+    image: redis:7-alpine
+    container_name: starterkit_redis
+    ports: ["6380:6379"]
+    networks: [starterkit]
+
+  node:
+    image: node:20-alpine
+    container_name: starterkit_node
+    working_dir: /app
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    volumes:
+      - ./:/app
+    ports: ["5173:5173"]
+    networks: [starterkit]
+
+  mailhog:
+    image: mailhog/mailhog
+    container_name: starterkit_mailhog
+    ports: ["1025:1025", "8025:8025"]
+    networks: [starterkit]
+
+networks:
+  starterkit:
+    driver: bridge
+
+volumes:
+  mysql-data:

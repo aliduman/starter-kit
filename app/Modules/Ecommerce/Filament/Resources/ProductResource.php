@@ -1,0 +1,59 @@
+<?php
+
+namespace App\Modules\Ecommerce\Filament\Resources;
+
+use App\Modules\Ecommerce\Filament\Resources\ProductResource\Pages;
+use App\Modules\Ecommerce\Models\Product;
+use Filament\Forms;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Table;
+
+class ProductResource extends Resource
+{
+    protected static ?string $model = Product::class;
+
+    protected static ?string $navigationGroup = 'E-Commerce';
+
+    protected static ?string $navigationIcon = 'heroicon-o-shopping-bag';
+
+    public static function form(Form $form): Form
+    {
+        return $form->schema([
+            Forms\Components\TextInput::make('name')->required(),
+            Forms\Components\TextInput::make('sku'),
+            Forms\Components\TextInput::make('price')->numeric()->required(),
+            Forms\Components\TextInput::make('compare_price')->numeric(),
+            Forms\Components\TextInput::make('currency')->default('TRY')->maxLength(3),
+            Forms\Components\TextInput::make('stock')->numeric()->default(0),
+            Forms\Components\Textarea::make('description')->columnSpanFull(),
+            Forms\Components\Toggle::make('is_active')->default(true),
+        ]);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                Tables\Columns\TextColumn::make('name')->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('sku')->toggleable(),
+                Tables\Columns\TextColumn::make('price')->money('TRY'),
+                Tables\Columns\TextColumn::make('stock')->numeric(),
+                Tables\Columns\IconColumn::make('is_active')->boolean(),
+            ])
+            ->actions([
+                Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
+            ]);
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ListProducts::route('/'),
+            'create' => Pages\CreateProduct::route('/create'),
+            'edit' => Pages\EditProduct::route('/{record}/edit'),
+        ];
+    }
+}
