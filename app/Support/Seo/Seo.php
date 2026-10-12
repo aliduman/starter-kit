@@ -61,7 +61,8 @@ class Seo
 
     /**
      * Site varsayılanlarını ekler. Anahtarlar: site_name, description, image, same_as (list), search_url
-     * ({search_term_string} içeren), feeds (list<[title, href]>).
+     * ({search_term_string} içeren), feeds (list<[title, href]>), verification (meta adı => doğrulama kodu; ör.
+     * google-site-verification), analytics (sağlayıcı => kimlik; ör. ga4, istemciye bkz. analytics()).
      *
      * @param  callable(): array<string, mixed>  $resolver
      */
@@ -82,6 +83,8 @@ class Seo
             'same_as' => [],
             'search_url' => null,
             'feeds' => [],
+            'verification' => array_filter((array) config('seo.verification')),
+            'analytics' => array_filter((array) config('seo.analytics')),
         ];
 
         foreach ($this->defaultsResolvers as $resolver) {
@@ -130,6 +133,10 @@ class Seo
             $this->meta('article:section', 'property', 'article:section', $data['section'] ?? null),
         ];
 
+        foreach ($site['verification'] as $name => $token) {
+            $tags[] = $this->meta('verification:'.$name, 'name', $name, $token);
+        }
+
         foreach (array_values($site['feeds']) as $i => [$feedTitle, $href]) {
             $tags[] = '<link data-inertia="feed-'.$i.'" rel="alternate" type="application/rss+xml" title="'
                 .e($feedTitle).'" href="'.e($this->absolute($href)).'">';
@@ -144,6 +151,17 @@ class Seo
         $tags[] = $this->schema($site, $nodes);
 
         return array_values(array_filter($tags));
+    }
+
+    /**
+     * İstemcide çerez onayından sonra yüklenecek ölçüm araçları (sağlayıcı => kimlik). Dizine kapalı ortamlar
+     * (test/staging) ölçülmez; canlı verisi kirlenmesin.
+     *
+     * @return array<string, string>
+     */
+    public function analytics(): array
+    {
+        return config('seo.indexable') ? $this->defaults()['analytics'] : [];
     }
 
     /** Yayın/kuruluş düğümleri her sayfada; sayfanın kendi düğümleri (Article, ProfilePage...) eklenir. */

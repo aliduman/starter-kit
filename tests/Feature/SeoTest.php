@@ -73,3 +73,21 @@ it('lists the published content of every enabled module in the sitemap', functio
         ->assertSee(route('ecommerce.products.show', $product->slug))
         ->assertDontSee(route('media.articles.show', $draft->slug));
 });
+
+it('prints search engine verification meta tags from config', function () {
+    config()->set('seo.verification', ['google-site-verification' => 'abc_DEF-123', 'msvalidate.01' => null]);
+
+    get('/')
+        ->assertSee('<meta data-inertia="verification:google-site-verification" name="google-site-verification" content="abc_DEF-123">', false)
+        ->assertDontSee('msvalidate.01', false);
+});
+
+it('sends analytics trackers to the client only when the site is indexable', function () {
+    config()->set('seo.analytics', ['ga4' => 'G-AB12CD34']);
+
+    config()->set('seo.indexable', true);
+    get('/')->assertInertia(fn ($page) => $page->where('analytics', ['ga4' => 'G-AB12CD34']));
+
+    config()->set('seo.indexable', false);
+    get('/')->assertInertia(fn ($page) => $page->where('analytics', []));
+});

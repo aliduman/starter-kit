@@ -52,6 +52,10 @@ Ported on 2026-10-12 (second pass, uncommitted), generic versions of Şahid's pl
   (`config('app.setup_token')`), throttled 5/min, runs without session middleware (works on an empty database with
   `SESSION_DRIVER=database`), clears the response cache, `noindex`. In production `DatabaseSeeder` creates the admin
   only from `SETUP_ADMIN_EMAIL`/`SETUP_ADMIN_PASSWORD`, never `admin@example.com`/`password`.
+- Verification and analytics: `config/seo.php` `verification` (meta name => token) and `analytics` (provider => id,
+  only `ga4` today), overridable by a site's settings through `Seo::resolveDefaultsUsing`. Trackers reach the client
+  as the shared `analytics` prop only when `indexable`; `resources/js/analytics.js` loads them after consent from
+  `~shared/CookieConsent.vue` (footer "Çerez tercihleri" reopens it). Şahid fills both from its Site Ayarları.
 - Admin panel path is `config('filament.path')` (env `FILAMENT_PATH`), so `config:cache` keeps it.
 
 Generic names differ from Şahid (`ResponseCacheInvalidator`, `InvalidatesResponseCache`, `Publishable`; Şahid still has

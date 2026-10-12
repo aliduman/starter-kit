@@ -4,6 +4,7 @@ import { createPinia } from 'pinia';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { route } from './route';
+import { startAnalytics } from './analytics';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Starter Kit';
 
@@ -41,6 +42,9 @@ createInertiaApp({
         // Şablonlarda route('ad', parametreler); <script setup> içinde '@/route' içe aktarılır.
         app.config.globalProperties.route = route;
         app.mount(el);
+
+        // Önceki ziyarette onay verildiyse ölçüm hemen başlar; yoksa çerez bandı (CookieConsent) sorar.
+        startAnalytics(props.initialPage.props.analytics);
     },
     progress: { color: '#4f46e5' },
 });

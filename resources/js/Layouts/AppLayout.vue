@@ -2,9 +2,15 @@
 import { Link, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import NavBar from '~shared/NavBar.vue';
+import CookieConsent from '~shared/CookieConsent.vue';
+import { hasTrackers, preferencesOpen } from '@/analytics';
 
 const page = usePage();
 const flash = computed(() => page.props.flash || {});
+
+const openCookiePreferences = () => {
+    preferencesOpen.value = true;
+};
 </script>
 
 <template>
@@ -25,8 +31,15 @@ const flash = computed(() => page.props.flash || {});
         <footer class="border-t border-slate-200 bg-white py-6 text-sm text-slate-500">
             <div class="mx-auto max-w-7xl px-4 flex justify-between">
                 <span>© {{ new Date().getFullYear() }} {{ $page.props.app.name }}</span>
-                <Link href="/admin" class="hover:text-slate-900">Admin</Link>
+                <div class="flex gap-4">
+                    <button v-if="hasTrackers(page.props.analytics)" class="hover:text-slate-900" @click="openCookiePreferences">
+                        Çerez tercihleri
+                    </button>
+                    <Link href="/admin" class="hover:text-slate-900">Admin</Link>
+                </div>
             </div>
         </footer>
+
+        <CookieConsent />
     </div>
 </template>

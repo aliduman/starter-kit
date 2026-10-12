@@ -31,6 +31,8 @@ class HandleInertiaRequests extends Middleware
             ],
             // Varsayılan SEO etiketleri; sayfalar kendi `head` prop'unu (Seo::page) gönderince bu ezilir.
             'head' => Seo::page(),
+            // Çerez onayından sonra yüklenen ölçüm araçları (resources/js/analytics.js).
+            'analytics' => fn () => app(Seo::class)->analytics(),
             'modules' => fn () => collect(Modules::all())
                 ->map(fn ($module, $key) => ['enabled' => Modules::isEnabled($key)])
                 ->all(),

@@ -60,4 +60,26 @@ return [
 
     'twitter_site' => env('SEO_TWITTER_SITE'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Verification and analytics
+    |--------------------------------------------------------------------------
+    |
+    | Search engine verification meta tags (meta name => token) and analytics
+    | trackers (provider => id; loaded in the browser only after cookie
+    | consent, and only when `indexable`). A site's settings panel can
+    | override both through Seo::resolveDefaultsUsing.
+    |
+    */
+
+    'verification' => [
+        'google-site-verification' => env('SEO_GOOGLE_SITE_VERIFICATION'),
+        'msvalidate.01' => env('SEO_BING_SITE_VERIFICATION'),
+        'yandex-verification' => env('SEO_YANDEX_VERIFICATION'),
+    ],
+
+    'analytics' => [
+        'ga4' => env('SEO_GA4_ID'),
+    ],
+
 ];
