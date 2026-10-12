@@ -1,0 +1,62 @@
+name: Test & release package
+
+# Sunucuya bağlanmaz. Testleri çalıştırır ve sunucuya elle yüklenecek sürüm paketini (scripts/build-release.sh)
+# indirilebilir artifact olarak ekler: Actions → çalıştırma → Artifacts → <repo>-release-<sha>.
+# Deploy adımları: CPANEL_DEPLOY.md.
+
+on:
+  push:
+    branches:
+      - main
+      - furkan_dev
+  workflow_dispatch:
+
+jobs:
+  release:
+    name: Test & package
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP 8.4
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, intl, gd, zip, bcmath, exif, pdo_mysql, pdo_sqlite
+          coverage: none
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Install dependencies
+        run: |
+          composer install --no-interaction --no-progress --prefer-dist
+          npm ci
+
+      # Feature testleri public/build/manifest.json ister.
+      - name: Build assets
+        run: npm run build
+
+      - name: Run tests
+        run: APP_KEY=base64:$(openssl rand -base64 32) vendor/bin/pest
+
+      - name: Build release package
+        id: package
+        run: |
+          scripts/build-release.sh HEAD "$RUNNER_TEMP/release"
+          echo "name=$(basename "$GITHUB_WORKSPACE")-release-$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+
+      # Klasör yüklenir; GitHub onu tek zip olarak verir (zip içinde zip olmasın). .htaccess dosyaları gizli
+      # sayıldığı için include-hidden-files şart.
+      - name: Upload release package
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.package.outputs.name }}
+          path: ${{ runner.temp }}/release/${{ steps.package.outputs.name }}/
+          include-hidden-files: true
+          retention-days: 14

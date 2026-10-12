@@ -1,0 +1,18 @@
+# -------------------------------------------------------------
+# KÖK .htaccess — tüm istekleri public/ altına yönlendirir.
+# Document Root zaten public/ gösteriyorsa bu dosya devreye girmez, zararsızdır.
+# -------------------------------------------------------------
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    RewriteRule ^$ public/ [L]
+    RewriteRule (.*) public/$1 [L]
+</IfModule>
+
+# Hassas dosyalara doğrudan erişimi engelle
+<FilesMatch "^(\.env|\.env\..*|composer\.(json|lock)|package(-lock)?\.json|artisan|preload\.php|.*\.yml)$">
+    Require all denied
+</FilesMatch>
+
+# Uygulama klasörlerine doğrudan erişimi engelle
+RedirectMatch 403 ^/(app|bootstrap|config|database|lang|resources|routes|storage/app|storage/framework|storage/logs|tests|vendor|deploy)(/|$)

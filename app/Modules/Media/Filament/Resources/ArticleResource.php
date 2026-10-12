@@ -4,9 +4,10 @@ namespace App\Modules\Media\Filament\Resources;
 
 use App\Modules\Media\Filament\Resources\ArticleResource\Pages;
 use App\Modules\Media\Models\Article;
+use Filament\Actions;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
 
@@ -14,13 +15,13 @@ class ArticleResource extends Resource
 {
     protected static ?string $model = Article::class;
 
-    protected static ?string $navigationGroup = 'Media';
+    protected static string|\UnitEnum|null $navigationGroup = 'Media';
 
-    protected static ?string $navigationIcon = 'heroicon-o-newspaper';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-newspaper';
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form->schema([
+        return $schema->components([
             Forms\Components\TextInput::make('title')->required(),
             Forms\Components\TextInput::make('category'),
             Forms\Components\Textarea::make('excerpt')->rows(3),
@@ -39,9 +40,9 @@ class ArticleResource extends Resource
                 Tables\Columns\IconColumn::make('is_published')->boolean(),
                 Tables\Columns\TextColumn::make('published_at')->dateTime(),
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+            ->recordActions([
+                Actions\EditAction::make(),
+                Actions\DeleteAction::make(),
             ]);
     }
 

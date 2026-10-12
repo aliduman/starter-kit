@@ -2,20 +2,28 @@
 
 namespace App\Providers;
 
+use App\Support\Modules;
+use App\Support\Routing\TrailingSlash;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
+/**
+ * Boots every module enabled in config/modules.php:
+ *  - registers its own service provider (bindings, observers, policies)
+ *  - Routes/web.php (web + TrailingSlash middleware, `prefix`, route names `{key}.`)
+ *  - Routes/api.php (api middleware, /api/{prefix|key}, route names `api.{key}.`)
+ *  - Views/ (Blade namespace = module key, e.g. view('corporate::page'))
+ *  - Database/migrations/
+ *  - Console/*.php artisan commands
+ * Filament resources are discovered by AdminPanelProvider using the same list.
+ */
 class ModuleServiceProvider extends ServiceProvider
 {
-    /**
-     * Each module ships with its own provider that hooks into bindings,
-     * Filament resources, events and policies. We boot whichever modules
-     * are enabled in config/modules.php and register their web routes.
-     */
     public function register(): void
     {
-        foreach ($this->enabledModules() as $key => $config) {
-            $provider = $config['provider'] ?? null;
+        foreach (Modules::enabled() as $module) {
+            $provider = $module['provider'] ?? null;
 
             if ($provider && class_exists($provider)) {
                 $this->app->register($provider);
@@ -25,43 +33,40 @@ class ModuleServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        foreach ($this->enabledModules() as $key => $config) {
-            $base = base_path("app/Modules/{$config['namespace']}");
+        foreach (Modules::enabled() as $key => $module) {
+            $prefix = $module['prefix'] ?? '';
 
-            $webRoutes = $base.'/Routes/web.php';
-            $apiRoutes = $base.'/Routes/api.php';
-            $views = $base.'/Views';
-            $migrations = $base.'/Database/migrations';
-
-            if (file_exists($webRoutes)) {
-                Route::middleware('web')
-                    ->prefix($config['prefix'] ?? null)
+            if (file_exists($webRoutes = Modules::path($module, 'Routes/web.php'))) {
+                Route::middleware(['web', TrailingSlash::MIDDLEWARE])
+                    ->prefix($prefix)
+                    ->name($key.'.')
                     ->group($webRoutes);
             }
 
-            if (file_exists($apiRoutes)) {
+            if (file_exists($apiRoutes = Modules::path($module, 'Routes/api.php'))) {
                 Route::middleware('api')
-                    ->prefix('api/'.($config['prefix'] ?? $key))
+                    ->prefix('api/'.($prefix ?: $key))
+                    ->name('api.'.$key.'.')
                     ->group($apiRoutes);
             }
 
-            if (is_dir($views)) {
+            if (is_dir($views = Modules::path($module, 'Views'))) {
                 $this->loadViewsFrom($views, $key);
             }
 
-            if (is_dir($migrations)) {
+            if (is_dir($migrations = Modules::path($module, 'Database/migrations'))) {
                 $this->loadMigrationsFrom($migrations);
             }
-        }
-    }
 
-    /**
-     * @return array<string, array<string, mixed>>
-     */
-    protected function enabledModules(): array
-    {
-        return collect(config('modules.list', []))
-            ->filter(fn ($cfg) => (bool) ($cfg['enabled'] ?? false))
-            ->all();
+            if ($this->app->runningInConsole() && is_dir($console = Modules::path($module, 'Console'))) {
+                foreach (glob($console.'/*.php') ?: [] as $file) {
+                    $class = Modules::namespace($module, 'Console\\'.basename($file, '.php'));
+
+                    if (class_exists($class) && is_subclass_of($class, Command::class)) {
+                        $this->commands($class);
+                    }
+                }
+            }
+        }
     }
 }

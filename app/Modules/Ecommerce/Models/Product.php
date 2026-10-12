@@ -2,6 +2,8 @@
 
 namespace App\Modules\Ecommerce\Models;
 
+use App\Support\Content\Publishable;
+use App\Support\ResponseCache\Concerns\InvalidatesResponseCache;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\HasMedia;
@@ -14,6 +16,10 @@ class Product extends Model implements HasMedia
     use HasFactory;
     use HasSlug;
     use InteractsWithMedia;
+    use InvalidatesResponseCache;
+    use Publishable;
+
+    protected string $publishedFlag = 'is_active';
 
     protected $table = 'ecommerce_products';
 

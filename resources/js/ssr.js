@@ -4,7 +4,7 @@ import { createInertiaApp } from '@inertiajs/vue3';
 import createServer from '@inertiajs/vue3/server';
 import { createPinia } from 'pinia';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
-import { ZiggyVue } from 'ziggy-js';
+import { route } from './route';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Starter Kit';
 
@@ -16,10 +16,16 @@ createServer((page) =>
         resolve: (name) =>
             resolvePageComponent(`./Pages/${name}.vue`, import.meta.glob('./Pages/**/*.vue')),
         setup({ App, props, plugin }) {
-            return createSSRApp({ render: () => h(App, props) })
+            // Sunucuda `@routes` yok; route.js'in okuduğu küresel Ziggy sayfa prop'undan kurulur.
+            globalThis.Ziggy = { ...page.props.ziggy, location: new URL(page.props.ziggy.location) };
+
+            const app = createSSRApp({ render: () => h(App, props) })
                 .use(plugin)
-                .use(createPinia())
-                .use(ZiggyVue, { ...page.props.ziggy, location: new URL(page.props.ziggy.location) });
+                .use(createPinia());
+
+            app.config.globalProperties.route = route;
+
+            return app;
         },
     }),
 );

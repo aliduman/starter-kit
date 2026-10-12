@@ -1,10 +1,18 @@
 <?php
 
+use App\Http\Middleware\EnforceTrailingSlash;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\RedirectLegacyUrls;
+use App\Support\Routing\TrailingSlash;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
+use Spatie\Permission\Middleware\PermissionMiddleware;
+use Spatie\Permission\Middleware\RoleMiddleware;
+use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
+use Spatie\ResponseCache\Middlewares\CacheResponse;
+use Spatie\ResponseCache\Middlewares\DoNotCacheResponse;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -14,23 +22,24 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        // Eski adres biçimleri (App\Support\Routing\LegacyRedirects) rota eşleşmesinden önce yönlenir.
+        $middleware->append(RedirectLegacyUrls::class);
+
         $middleware->web(append: [
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
         ]);
 
         $middleware->alias([
-            'role' => Spatie\Permission\Middleware\RoleMiddleware::class,
-            'permission' => Spatie\Permission\Middleware\PermissionMiddleware::class,
-            'role_or_permission' => Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
-            'cacheResponse' => Spatie\ResponseCache\Middlewares\CacheResponse::class,
-            'doNotCacheResponse' => Spatie\ResponseCache\Middlewares\DoNotCacheResponse::class,
+            'role' => RoleMiddleware::class,
+            'permission' => PermissionMiddleware::class,
+            'role_or_permission' => RoleOrPermissionMiddleware::class,
+            'cacheResponse' => CacheResponse::class,
+            'doNotCacheResponse' => DoNotCacheResponse::class,
+            TrailingSlash::MIDDLEWARE => EnforceTrailingSlash::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
     })
-    ->withProviders([
-        App\Providers\ModuleServiceProvider::class,
-    ])
     ->create();

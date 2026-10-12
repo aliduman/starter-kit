@@ -11,6 +11,15 @@ return [
     'faker_locale' => env('APP_FAKER_LOCALE', 'tr_TR'),
     'cipher' => 'AES-256-CBC',
     'key' => env('APP_KEY'),
+
+    // /kurulum/{token} (SetupController) yalnızca doluyken açılır. Kullanmadığınız dönemde boş bırakın.
+    'setup_token' => env('SETUP_TOKEN'),
+
+    // İlk kurulumda seed'in açtığı admin (DatabaseSeeder). Production'da boşsa admin oluşturulmaz.
+    'setup_admin' => [
+        'email' => env('SETUP_ADMIN_EMAIL'),
+        'password' => env('SETUP_ADMIN_PASSWORD'),
+    ],
     'previous_keys' => [
         ...array_filter(
             explode(',', (string) env('APP_PREVIOUS_KEYS', ''))

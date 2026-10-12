@@ -4,9 +4,10 @@ namespace App\Modules\Ecommerce\Filament\Resources;
 
 use App\Modules\Ecommerce\Filament\Resources\ProductResource\Pages;
 use App\Modules\Ecommerce\Models\Product;
+use Filament\Actions;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
 
@@ -14,13 +15,13 @@ class ProductResource extends Resource
 {
     protected static ?string $model = Product::class;
 
-    protected static ?string $navigationGroup = 'E-Commerce';
+    protected static string|\UnitEnum|null $navigationGroup = 'E-Commerce';
 
-    protected static ?string $navigationIcon = 'heroicon-o-shopping-bag';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-shopping-bag';
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form->schema([
+        return $schema->components([
             Forms\Components\TextInput::make('name')->required(),
             Forms\Components\TextInput::make('sku'),
             Forms\Components\TextInput::make('price')->numeric()->required(),
@@ -42,9 +43,9 @@ class ProductResource extends Resource
                 Tables\Columns\TextColumn::make('stock')->numeric(),
                 Tables\Columns\IconColumn::make('is_active')->boolean(),
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+            ->recordActions([
+                Actions\EditAction::make(),
+                Actions\DeleteAction::make(),
             ]);
     }
 

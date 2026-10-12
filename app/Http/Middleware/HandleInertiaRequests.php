@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Support\Modules;
+use App\Support\Seo\Seo;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 use Tighten\Ziggy\Ziggy;
@@ -23,8 +25,14 @@ class HandleInertiaRequests extends Middleware
                 'name' => config('app.name'),
                 'locale' => app()->getLocale(),
             ],
-            'modules' => fn () => collect(config('modules.list'))
-                ->map(fn ($cfg) => ['enabled' => (bool) ($cfg['enabled'] ?? false)])
+            'site' => [
+                'name' => config('app.name'),
+                'title_separator' => config('seo.title_separator'),
+            ],
+            // Varsayılan SEO etiketleri; sayfalar kendi `head` prop'unu (Seo::page) gönderince bu ezilir.
+            'head' => Seo::page(),
+            'modules' => fn () => collect(Modules::all())
+                ->map(fn ($module, $key) => ['enabled' => Modules::isEnabled($key)])
                 ->all(),
             'auth' => [
                 'user' => fn () => $request->user()

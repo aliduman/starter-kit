@@ -2,10 +2,13 @@
 
 namespace App\Modules\Ecommerce\Providers;
 
+use App\Modules\Ecommerce\Models\Product;
 use App\Modules\Ecommerce\Services\Payment\IyzicoGateway;
 use App\Modules\Ecommerce\Services\Payment\PaymentGateway;
 use App\Modules\Ecommerce\Services\Payment\PaymentManager;
 use App\Modules\Ecommerce\Services\Payment\StripeGateway;
+use App\Support\Modules;
+use App\Support\Seo\Sitemap;
 use Illuminate\Support\ServiceProvider;
 
 class EcommerceServiceProvider extends ServiceProvider
@@ -22,13 +25,19 @@ class EcommerceServiceProvider extends ServiceProvider
 
         $this->app->bind(PaymentGateway::class, function ($app) {
             return $app->make(PaymentManager::class)->driver(
-                config('modules.list.ecommerce.default_gateway', 'stripe')
+                Modules::get('ecommerce')['default_gateway'] ?? 'stripe'
             );
         });
     }
 
     public function boot(): void
     {
-        //
+        $this->app->make(Sitemap::class)->add(function () {
+            yield ['loc' => route('ecommerce.products.index', absolute: false)];
+
+            foreach (Product::query()->published()->get(['id', 'slug', 'updated_at']) as $record) {
+                yield ['loc' => route('ecommerce.products.show', $record->slug, absolute: false), 'lastmod' => $record->updated_at];
+            }
+        });
     }
 }

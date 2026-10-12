@@ -4,9 +4,10 @@ namespace App\Modules\Corporate\Filament\Resources;
 
 use App\Modules\Corporate\Filament\Resources\PageResource\Pages;
 use App\Modules\Corporate\Models\Page;
+use Filament\Actions;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
 
@@ -14,13 +15,13 @@ class PageResource extends Resource
 {
     protected static ?string $model = Page::class;
 
-    protected static ?string $navigationGroup = 'Corporate';
+    protected static string|\UnitEnum|null $navigationGroup = 'Corporate';
 
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-document-text';
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form->schema([
+        return $schema->components([
             Forms\Components\TextInput::make('title')->required()->maxLength(255),
             Forms\Components\TextInput::make('slug')->maxLength(255),
             Forms\Components\Textarea::make('excerpt')->rows(3),
@@ -42,9 +43,9 @@ class PageResource extends Resource
             ->filters([
                 Tables\Filters\TernaryFilter::make('is_published'),
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+            ->recordActions([
+                Actions\EditAction::make(),
+                Actions\DeleteAction::make(),
             ]);
     }
 

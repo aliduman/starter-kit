@@ -23,10 +23,10 @@ export default defineConfig({
     ],
     resolve: {
         alias: {
-            '@': path.resolve(__dirname, 'resources/js'),
-            '~corporate': path.resolve(__dirname, 'resources/js/Components/corporate'),
-            '~ecommerce': path.resolve(__dirname, 'resources/js/Components/ecommerce'),
-            '~shared': path.resolve(__dirname, 'resources/js/Components/shared'),
+            '@': path.resolve(import.meta.dirname, 'resources/js'),
+            '~corporate': path.resolve(import.meta.dirname, 'resources/js/Components/corporate'),
+            '~ecommerce': path.resolve(import.meta.dirname, 'resources/js/Components/ecommerce'),
+            '~shared': path.resolve(import.meta.dirname, 'resources/js/Components/shared'),
         },
     },
     server: {

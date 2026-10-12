@@ -3,6 +3,8 @@
 namespace App\Modules\Media\Models;
 
 use App\Models\User;
+use App\Support\Content\Publishable;
+use App\Support\ResponseCache\Concerns\InvalidatesResponseCache;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -16,6 +18,10 @@ class Article extends Model implements HasMedia
     use HasFactory;
     use HasSlug;
     use InteractsWithMedia;
+    use InvalidatesResponseCache;
+    use Publishable;
+
+    protected string $publishedAtColumn = 'published_at';
 
     protected $table = 'media_articles';
 

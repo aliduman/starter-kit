@@ -1,4 +1,4 @@
-# Starter Kit · Laravel 11 + Vue 3 + Inertia + Filament v3
+# Starter Kit · Laravel 13 + Vue 3 + Inertia 3 + Filament 5
 
 Modüler, prodüksiyon hedefli bir starter kit. Tek codebase üzerinden 4 farklı dikey:
 
@@ -15,11 +15,11 @@ Her modül `app/Modules/{Module}` altında izole; `config/modules.php` üzerinde
 
 ## 1. Gereksinimler
 
-- PHP **8.3**
+- PHP **8.4+**
 - Composer 2
-- Node **20**
+- Node **24+**
 - MySQL **8** (veya SQLite, test için)
-- Redis **7** (cache + session + queue)
+- Redis gerekmez: cache, session ve queue varsayılan olarak `database` sürücüsünde (paylaşımlı cPanel uyumlu).
 - (Opsiyonel) Docker Desktop — `docker-compose.yml` ile tam ortam ayağa kalkar.
 
 ## 2. Kurulum
@@ -75,12 +75,11 @@ MODULE_REALESTATE_ENABLED=true
 MODULE_MEDIA_ENABLED=true
 ```
 
-Bir modül `false` yapıldığında ait olduğu route'lar, view'lar, migration'lar ve Filament resource'ları yüklenmez. Yeni modül eklemek için:
+Bir modül `false` yapıldığında ait olduğu provider, route'lar, view'lar, migration'lar, `Console/` komutları ve Filament resource/page/widget'ları yüklenmez. Modül durumu her yerde `App\Support\Modules` üzerinden okunur. Web route adları otomatik olarak `{key}.` (API: `api.{key}.`) önekini alır; `prefix` `.env` ile değiştirilebilir (`MODULE_MEDIA_PREFIX=...`). Yeni modül eklemek için:
 
-1. `app/Modules/Yourname/` altına `Http`, `Models`, `Routes`, `Views`, `Providers`, `Filament/Resources` dizinlerini aç.
+1. `app/Modules/Yourname/` altına `Http/Controllers`, `Models`, `Routes`, `Views`, `Providers`, `Database/migrations`, `Filament/{Resources,Pages,Widgets}`, `Console` dizinlerinden gerekenleri aç.
 2. `Providers/YournameServiceProvider.php` oluştur.
-3. `config/modules.php` listesine satır ekle (`namespace`, `provider`, `prefix`, `enabled`).
-4. `composer dump-autoload`.
+3. `config/modules.php` listesine satır ekle (`enabled`, `namespace`, `name`, `description`, `prefix`, `provider`). Başka bağlantı gerekmez.
 
 ## 5. Ödeme entegrasyonu
 
@@ -109,8 +108,8 @@ IYZICO_BASE_URL=https://sandbox-api.iyzipay.com
 
 - **OPcache** + **JIT** ayarları `deploy/php/opcache.ini` içinde. Production'da `validate_timestamps=0`, deploy sonrası `php artisan opcache:clear` veya FPM reload.
 - **Preload**: `preload.php` üzerinden temel Laravel sınıfları opcache'e gömülür.
-- **Response cache**: `spatie/laravel-responsecache` v7 default aktif. GET cevapları Redis'te tutulur. Geçersizleştirme için `php artisan responsecache:clear`.
-- **Redis object cache**: `cache`, `session`, `queue` üçü de Redis. `REDIS_CACHE_DB`, `REDIS_DB` ayrı.
+- **Response cache**: `spatie/laravel-responsecache` v8; `cacheResponse` middleware'i ile açılır, `file` store'da tutulur. `App\Support\ResponseCache\InertiaAwareCacheProfile` HTML ve Inertia JSON cevaplarını ayrı anahtarlarda saklar. Geçersizleştirme için `php artisan responsecache:clear`.
+- **Cache / session / queue**: varsayılan `database`. Redis isteğe bağlı (`CACHE_STORE=redis` vb.).
 
 ## 7. Queue worker'ları
 
@@ -130,11 +129,17 @@ sudo supervisorctl start laravel-worker:*
 php artisan test
 ```
 
-CI üzerinde MySQL 8 + Redis 7 ile çalışır (bkz. `.github/workflows/deploy.yml`).
+CI üzerinde MySQL 8 ile çalışır (bkz. `.github/workflows/deploy.yml`).
 
-## 9. Deploy (Ubuntu 22.04 + Nginx + PHP-FPM)
+## 9. Deploy
 
-CI/CD workflow'u:
+**Production hedefi paylaşımlı cPanel'dir:** sürüm paketi (`scripts/build-release.sh` veya
+`.github/workflows/release.yml` artifact'ı) panelden yüklenip açılır, ardından `/kurulum/{SETUP_TOKEN}` çalıştırılır.
+Adımlar, `.env` ve cron: **[CPANEL_DEPLOY.md](CPANEL_DEPLOY.md)**.
+
+### Eski VPS yolu (Ubuntu + Nginx + PHP-FPM, kullanılmıyor)
+
+`.github/workflows/deploy.yml.disabled` (kapalı) şu akışı izliyordu:
 
 1. Pest test
 2. Vite build
@@ -151,6 +156,20 @@ Gereken GitHub secret'ları:
 | `DEPLOY_PATH`       | uygulama dizini (`/var/www/starter-kit`)  |
 
 Nginx vhost örneği: `deploy/nginx/site.conf`. SSL için `deploy/nginx/site-ssl.conf`.
+
+## SEO ve adresler
+
+- Her Inertia sayfası `head` prop'u gönderir (`App\Support\Seo\Seo::page([...])`: `title`, `description`, `image`,
+  `type`, `schema`...). `app.blade.php` etiketleri ilk yüklemede basar, Inertia (`serverHead: true`) gezinmede günceller.
+  Vue `<Head>` içine `head-key`'siz `<meta>` koymayın; sunucu etiketleriyle çakışır.
+- `/sitemap.xml`: modüller provider'larında `App\Support\Seo\Sitemap::add()` ile adres ekler. `/robots.txt` ve
+  `noindex`: `SEO_INDEXABLE` (test hostlarında `false`).
+- İçerik modelleri `Publishable` (yayın bayrağı + yayın tarihi, `published()` scope) ve `InvalidatesResponseCache`
+  kullanır. Yayın tarihi ileride olan kayıtlar için kolonu `ScheduledCacheBoundaries` kaydeder; cron (`schedule:run`)
+  zamanı gelince response cache'i temizler.
+- Kökte içerik adresi (`/{yol}`): `App\Support\Routing\ContentPaths::register()`. Değişen adres biçimleri için 301:
+  `App\Support\Routing\LegacyRedirects::add()`. Sondaki "/" kuralı: `SEO_TRAILING_SLASH`. Bağlantılarda yolu elle
+  yazmayın: PHP'de `route()`, Vue'da `route('ad', parametreler)` (`resources/js/route.js`).
 
 ## 10. API (Sanctum)
 
@@ -173,6 +192,7 @@ starter-kit/
 │   │   ├── AppServiceProvider.php
 │   │   ├── ModuleServiceProvider.php
 │   │   └── Filament/AdminPanelProvider.php
+│   ├── Support/Modules.php
 │   └── Modules/
 │       ├── Corporate/
 │       ├── Ecommerce/{Services/Payment, ...}
@@ -180,9 +200,8 @@ starter-kit/
 │       └── Media/
 ├── config/
 │   ├── modules.php
-│   ├── responsecache.php
-│   ├── permission.php
-│   └── media-library.php
+│   ├── inertia.php
+│   └── responsecache.php
 ├── resources/
 │   ├── js/
 │   │   ├── Components/{shared,corporate,ecommerce}

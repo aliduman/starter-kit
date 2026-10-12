@@ -4,6 +4,7 @@ namespace App\Modules\RealEstate\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Modules\RealEstate\Models\Listing;
+use App\Support\Seo\Seo;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -15,7 +16,7 @@ class ListingController extends Controller
         $listings = Listing::query()
             ->when($request->string('type')->toString(), fn ($q, $type) => $q->where('type', $type))
             ->when($request->string('city')->toString(), fn ($q, $city) => $q->where('city', $city))
-            ->where('is_published', true)
+            ->published()
             ->latest()
             ->paginate(20)
             ->withQueryString();
@@ -23,25 +24,32 @@ class ListingController extends Controller
         return Inertia::render('RealEstate/Index', [
             'listings' => $listings,
             'filters' => $request->only('type', 'city'),
+            // Süzgeçler aynı listenin görünümleridir; canonical'a girmez.
+            'head' => Seo::page(['title' => 'İlanlar']),
         ]);
     }
 
     public function show(string $slug): Response
     {
-        $listing = Listing::query()->where('slug', $slug)->firstOrFail();
+        $listing = Listing::query()->published()->where('slug', $slug)->firstOrFail();
 
         return Inertia::render('RealEstate/Show', [
             'listing' => $listing,
+            'head' => Seo::page([
+                'title' => $listing->title,
+                'description' => $listing->description,
+                'modified_time' => $listing->updated_at,
+            ]),
         ]);
     }
 
     public function apiIndex()
     {
-        return Listing::query()->where('is_published', true)->latest()->paginate(20);
+        return Listing::query()->published()->latest()->paginate(20);
     }
 
     public function apiShow(string $slug)
     {
-        return Listing::query()->where('slug', $slug)->firstOrFail();
+        return Listing::query()->published()->where('slug', $slug)->firstOrFail();
     }
 }

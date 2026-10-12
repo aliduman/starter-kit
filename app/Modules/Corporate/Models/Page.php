@@ -2,6 +2,8 @@
 
 namespace App\Modules\Corporate\Models;
 
+use App\Support\Content\Publishable;
+use App\Support\ResponseCache\Concerns\InvalidatesResponseCache;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\HasMedia;
@@ -14,6 +16,10 @@ class Page extends Model implements HasMedia
     use HasFactory;
     use HasSlug;
     use InteractsWithMedia;
+    use InvalidatesResponseCache;
+    use Publishable;
+
+    protected string $publishedAtColumn = 'published_at';
 
     protected $table = 'corporate_pages';
 

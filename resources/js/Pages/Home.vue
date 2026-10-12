@@ -8,7 +8,7 @@ defineProps({
 
 const benefits = [
     'Modüler mimari — modülleri tek bayrakla aç/kapat',
-    'Filament v3 admin paneli — anında yönetim',
+    'Filament 5 admin paneli — anında yönetim',
     'Inertia + Vue 3 + Tailwind v4 — modern frontend',
 ];
 </script>
@@ -19,7 +19,7 @@ const benefits = [
     <section class="relative pt-10 pb-20 text-center">
         <p class="inline-flex items-center gap-2 rounded-full bg-white/70 backdrop-blur px-4 py-1.5 text-xs font-semibold text-brand-700 ring-1 ring-brand-100">
             <span class="size-1.5 rounded-full bg-accent-500"></span>
-            Laravel 11 · Vue 3 · Inertia · Filament v3
+            Laravel 13 · Vue 3 · Inertia 3 · Filament 5
         </p>
 
         <h1 class="mt-6 font-display font-extrabold tracking-tight text-brand-900 text-5xl md:text-6xl lg:text-7xl leading-[1.05]">
