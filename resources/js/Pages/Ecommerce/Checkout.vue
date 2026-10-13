@@ -1,5 +1,5 @@
 <script setup>
-import { Head, useForm } from '@inertiajs/vue3';
+import { useForm } from '@inertiajs/vue3';
 import { useCartStore } from '@/Stores/cart.js';
 
 defineProps({ gateways: { type: Array, required: true } });
@@ -15,7 +15,6 @@ const submit = () => form.post('/shop/checkout');
 </script>
 
 <template>
-    <Head title="Ödeme" />
 
     <h1 class="text-2xl font-bold mb-6">Ödeme</h1>
 

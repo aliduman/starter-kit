@@ -1,11 +1,8 @@
 <script setup>
-import { Head } from '@inertiajs/vue3';
-
 defineProps({ listing: { type: Object, required: true } });
 </script>
 
 <template>
-    <Head :title="listing.title" />
     <h1 class="text-3xl font-bold">{{ listing.title }}</h1>
     <p class="mt-1 text-slate-600">{{ listing.city }} · {{ listing.district }}</p>
 

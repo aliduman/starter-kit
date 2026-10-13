@@ -25,10 +25,6 @@ class HandleInertiaRequests extends Middleware
                 'name' => config('app.name'),
                 'locale' => app()->getLocale(),
             ],
-            'site' => [
-                'name' => config('app.name'),
-                'title_separator' => config('seo.title_separator'),
-            ],
             // Varsayılan SEO etiketleri; sayfalar kendi `head` prop'unu (Seo::page) gönderince bu ezilir.
             'head' => Seo::page(),
             // Çerez onayından sonra yüklenen ölçüm araçları (resources/js/analytics.js).

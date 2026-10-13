@@ -1,5 +1,4 @@
 <script setup>
-import { Head } from '@inertiajs/vue3';
 import { useCartStore } from '@/Stores/cart.js';
 
 const props = defineProps({ product: { type: Object, required: true } });
@@ -7,7 +6,6 @@ const cart = useCartStore();
 </script>
 
 <template>
-    <Head :title="product.name" />
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div class="aspect-square bg-slate-100 rounded-xl"></div>

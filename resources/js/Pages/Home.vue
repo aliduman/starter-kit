@@ -1,5 +1,5 @@
 <script setup>
-import { Head, Link } from '@inertiajs/vue3';
+import { Link } from '@inertiajs/vue3';
 import Card from '~shared/Card.vue';
 
 defineProps({
@@ -14,7 +14,6 @@ const benefits = [
 </script>
 
 <template>
-    <Head title="Anasayfa" />
 
     <section class="relative pt-10 pb-20 text-center">
         <p class="inline-flex items-center gap-2 rounded-full bg-white/70 backdrop-blur px-4 py-1.5 text-xs font-semibold text-brand-700 ring-1 ring-brand-100">

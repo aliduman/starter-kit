@@ -6,21 +6,9 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import { route } from './route';
 import { startAnalytics } from './analytics';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Starter Kit';
-
 createInertiaApp({
-    // App\Support\Seo\Seo::fullTitle ile aynı kural; site adını zaten içeren başlıklar olduğu gibi kullanılır.
-    title: (title, page) => {
-        const siteName = page?.props?.site?.name || appName;
-        const separator = page?.props?.site?.title_separator ?? ' · ';
-
-        if (!title) {
-            return siteName;
-        }
-
-        return title.includes(siteName) ? title : `${title}${separator}${siteName}`;
-    },
-    // Sayfa `head` prop'undaki SEO etiketleri (App\Support\Seo\Seo) gezinmede de güncellenir.
+    // Başlık dahil SEO etiketlerinin tek kaynağı sayfanın `head` prop'u (App\Support\Seo\Seo); gezinmede de
+    // güncellenir. Sayfalar <Head> ile başlık vermez, verirse sunucu başlığını ezer.
     serverHead: true,
     resolve: (name) => {
         const page = resolvePageComponent(

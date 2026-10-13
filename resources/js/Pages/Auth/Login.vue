@@ -1,5 +1,5 @@
 <script setup>
-import { Head, useForm } from '@inertiajs/vue3';
+import { useForm } from '@inertiajs/vue3';
 
 const form = useForm({
     email: '',
@@ -11,7 +11,6 @@ const submit = () => form.post('/login');
 </script>
 
 <template>
-    <Head title="Giriş" />
 
     <div class="mx-auto max-w-md">
         <div class="card">

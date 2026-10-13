@@ -34,8 +34,8 @@ return [
     | Title separator
     |--------------------------------------------------------------------------
     |
-    | Page titles are "{title}{separator}{site name}". resources/js/app.js
-    | builds client-side titles with the same rule.
+    | Page titles are "{title}{separator}{site name}" (App\Support\Seo\Seo).
+    | Titles that already contain the site name are used as they are.
     |
     */
 
@@ -47,10 +47,13 @@ return [
     |--------------------------------------------------------------------------
     |
     | Used when neither the page nor a module's defaults resolver (see
-    | App\Support\Seo\Seo::resolveDefaultsUsing) provides a value. `image` may
-    | be relative to APP_URL.
+    | App\Support\Seo\Seo::resolveDefaultsUsing) provides a value. `home_title`
+    | and `description` apply to the homepage only. `image` may be relative to
+    | APP_URL.
     |
     */
+
+    'home_title' => env('SEO_HOME_TITLE'),
 
     'description' => env('SEO_DESCRIPTION'),
 

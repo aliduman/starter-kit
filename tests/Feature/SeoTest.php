@@ -36,6 +36,18 @@ it('sends the head prop on every page, with site defaults where the page sets no
     get('/')->assertSee('<title data-inertia="">Starter Kit</title>', false);
 });
 
+it('uses the home title and site description on the homepage only', function () {
+    config(['seo.home_title' => 'Starter Kit · Modüler site altyapısı', 'seo.description' => 'Site açıklaması.']);
+
+    get('/')
+        ->assertSee('<title data-inertia="">Starter Kit · Modüler site altyapısı</title>', false)
+        ->assertSee('<meta data-inertia="description" name="description" content="Site açıklaması.">', false);
+
+    get(route('media.articles.index'))
+        ->assertSee('<title data-inertia="">Haberler · Starter Kit</title>', false)
+        ->assertDontSee('name="description"', false);
+});
+
 it('hides drafts and scheduled content from public pages', function () {
     $draft = publishedArticle(['title' => 'Taslak', 'is_published' => false]);
     $scheduled = publishedArticle(['title' => 'Planlı', 'published_at' => now()->addDay()]);

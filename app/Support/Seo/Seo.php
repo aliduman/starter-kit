@@ -13,7 +13,8 @@ use Inertia\Inertia;
  *
  * Etiketler Inertia `head` prop'u olarak gider: ilk yüklemede root Blade view'ı basar (WhatsApp/Facebook/X
  * önizlemeleri JS çalıştırmaz), istemcide Inertia head manager (`serverHead: true`) aynı listeyi gezinmede
- * günceller. Her etiketin `data-inertia` anahtarı vardır; sayfaların <Head> başlığı sunucu başlığını ezer.
+ * günceller. Her etiketin `data-inertia` anahtarı vardır. Başlığın tek kaynağı burasıdır: Vue sayfalarındaki
+ * <Head> başlığı sunucu başlığını ezer, kullanılmaz.
  *
  * Site düzeyindeki varsayılanları (ad, açıklama, görsel, sosyal hesaplar, arama/RSS adresleri) modüller
  * resolveDefaultsUsing() ile verir; çekirdek hiçbir modüle bağlı değildir.
@@ -60,7 +61,8 @@ class Seo
     }
 
     /**
-     * Site varsayılanlarını ekler. Anahtarlar: site_name, description, image, same_as (list), search_url
+     * Site varsayılanlarını ekler. Anahtarlar: site_name, home_title ve description (ana sayfanın başlığı ve
+     * açıklaması), image, same_as (list), search_url
      * ({search_term_string} içeren), feeds (list<[title, href]>), verification (meta adı => doğrulama kodu; ör.
      * google-site-verification), analytics (sağlayıcı => kimlik; ör. ga4, istemciye bkz. analytics()).
      *
@@ -78,6 +80,7 @@ class Seo
     {
         $defaults = [
             'site_name' => config('app.name'),
+            'home_title' => config('seo.home_title'),
             'description' => config('seo.description'),
             'image' => config('seo.image'),
             'same_as' => [],
@@ -106,8 +109,11 @@ class Seo
     {
         $site = $this->defaults();
         $siteName = (string) $site['site_name'];
-        $title = $this->fullTitle($data['title'] ?? null, $siteName);
-        $description = $this->plain($data['description'] ?? null) ?: $this->plain($site['description']);
+        $home = request()->getPathInfo() === '/';
+        $title = $this->fullTitle($data['title'] ?? ($home ? $site['home_title'] : null), $siteName);
+        // Site açıklaması yalnızca ana sayfanın: her sayfada tekrarlanırsa yinelenen açıklama olur. Açıklaması
+        // olmayan sayfada etiket basılmaz, arama motoru özeti sayfa metninden çıkarır.
+        $description = $this->plain($data['description'] ?? null) ?: ($home ? $this->plain($site['description']) : null);
         $image = $this->absolute($data['image'] ?? null) ?: $this->absolute($site['image']);
         $url = $data['url'] ?? $this->canonical($data['canonical_query'] ?? []);
         $type = $data['type'] ?? 'website';
@@ -230,7 +236,6 @@ class Seo
             return $siteName;
         }
 
-        // app.js'teki title callback ile aynı kural.
         return Str::contains($title, $siteName) ? $title : $title.config('seo.title_separator', ' - ').$siteName;
     }
 

@@ -1,5 +1,5 @@
 <script setup>
-import { Head, Link } from '@inertiajs/vue3';
+import { Link } from '@inertiajs/vue3';
 
 defineProps({
     listings: { type: Object, required: true },
@@ -8,7 +8,6 @@ defineProps({
 </script>
 
 <template>
-    <Head title="Emlak" />
     <h1 class="text-2xl font-bold">Emlak İlanları</h1>
 
     <div class="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -4,6 +4,7 @@ namespace App\Modules\Ecommerce\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Ecommerce\Services\Payment\PaymentManager;
+use App\Support\Seo\Seo;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -15,6 +16,7 @@ class CheckoutController extends Controller
     {
         return Inertia::render('Ecommerce/Checkout', [
             'gateways' => ['stripe', 'iyzico'],
+            'head' => Seo::page(['title' => 'Ödeme', 'noindex' => true]),
         ]);
     }
 

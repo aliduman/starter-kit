@@ -31,8 +31,10 @@ Ported on 2026-10-12 (second pass, uncommitted), generic versions of Şahid's pl
 - SEO: `App\Support\Seo\Seo::page([...])` as each page's `head` prop (shared default in `HandleInertiaRequests`),
   printed by `app.blade.php`, kept in sync by `createInertiaApp({ serverHead: true })`. `/sitemap.xml` from
   `App\Support\Seo\Sitemap::add()` (every module provider registers its published records), `/robots.txt`,
-  `config/seo.php` (`indexable`, `trailing_slash`, `title_separator`). Don't put `<meta>` in Vue `<Head>` without a
-  matching `head-key`. `public/robots.txt` was removed: it shadowed the route.
+  `config/seo.php` (`indexable`, `trailing_slash`, `title_separator`, `home_title`). The `head` prop is the only
+  source of the title and meta tags: Vue pages don't use `<Head>` (its title overrides the server title after
+  hydration). The site description and `home_title` apply only to the homepage; a page without its own description
+  gets no description tag (no duplicates). `public/robots.txt` was removed: it shadowed the route.
 - Publication and cache: content models use `App\Support\Content\Publishable` (`published()` scope, flag +
   optional publish-at column; show pages 404 for drafts and scheduled records) and
   `App\Support\ResponseCache\Concerns\InvalidatesResponseCache`. Public GET routes carry `cacheResponse`. Modules

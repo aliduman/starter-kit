@@ -1,10 +1,8 @@
 <script setup>
-import { Head } from '@inertiajs/vue3';
 import PageHero from '~corporate/PageHero.vue';
 </script>
 
 <template>
-    <Head title="İletişim" />
     <PageHero title="İletişim" subtitle="Bizimle iletişime geçin." />
     <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
         <div class="card">
