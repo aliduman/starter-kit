@@ -3,6 +3,7 @@
 use App\Http\Middleware\EnforceTrailingSlash;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\RedirectLegacyUrls;
+use App\Http\Middleware\RedirectToAppUrl;
 use App\Support\Routing\TrailingSlash;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -22,7 +23,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // Eski adres biçimleri (App\Support\Routing\LegacyRedirects) rota eşleşmesinden önce yönlenir.
+        // Önce sitenin tek adresine (APP_URL), sonra eski adres biçimleri (App\Support\Routing\LegacyRedirects)
+        // rota eşleşmesinden önce yönlenir. Proxy güveninden sonra çalışmalı: şema oradan gelir.
+        $middleware->append(RedirectToAppUrl::class);
         $middleware->append(RedirectLegacyUrls::class);
 
         $middleware->web(append: [

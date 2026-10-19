@@ -33,9 +33,14 @@ class EcommerceServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->app->make(Sitemap::class)->add(function () {
-            yield ['loc' => route('ecommerce.products.index', absolute: false)];
+            $records = Product::query()->published()->get(['id', 'slug', 'updated_at']);
 
-            foreach (Product::query()->published()->get(['id', 'slug', 'updated_at']) as $record) {
+            // Boş liste sayfası ince içeriktir: sitemap'e girmez, sayfası da noindex.
+            if ($records->isNotEmpty()) {
+                yield ['loc' => route('ecommerce.products.index', absolute: false)];
+            }
+
+            foreach ($records as $record) {
                 yield ['loc' => route('ecommerce.products.show', $record->slug, absolute: false), 'lastmod' => $record->updated_at];
             }
         });

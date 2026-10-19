@@ -117,7 +117,7 @@ class Seo
         $image = $this->absolute($data['image'] ?? null) ?: $this->absolute($site['image']);
         $url = $data['url'] ?? $this->canonical($data['canonical_query'] ?? []);
         $type = $data['type'] ?? 'website';
-        $robots = ! config('seo.indexable') || ($data['noindex'] ?? false) ? 'noindex, nofollow' : 'index, follow';
+        $robots = ! config('seo.indexable') || ($data['noindex'] ?? false) ? 'noindex, nofollow' : config('seo.robots');
 
         $tags = [
             '<title data-inertia="">'.e($title).'</title>',

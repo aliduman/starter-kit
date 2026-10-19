@@ -17,6 +17,33 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Robots directives
+    |--------------------------------------------------------------------------
+    |
+    | The robots meta of indexable pages. `max-image-preview:large` lets search
+    | engines show large image previews (Google Discover needs it); WordPress
+    | (Yoast) sends the same directives.
+    |
+    */
+
+    'robots' => env('SEO_ROBOTS', 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Single address
+    |--------------------------------------------------------------------------
+    |
+    | When true, GET requests arriving with another scheme or host than APP_URL
+    | (http://, www., an old test subdomain) get a 301 to the same path on
+    | APP_URL, so search engines never index duplicate copies. Follows
+    | `indexable` by default: test and local hosts run under other addresses.
+    |
+    */
+
+    'redirect_to_app_url' => (bool) env('SEO_REDIRECT_TO_APP_URL', env('SEO_INDEXABLE', env('APP_ENV') === 'production')),
+
+    /*
+    |--------------------------------------------------------------------------
     | Trailing slash
     |--------------------------------------------------------------------------
     |

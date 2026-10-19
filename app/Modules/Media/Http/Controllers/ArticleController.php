@@ -12,12 +12,15 @@ class ArticleController extends Controller
 {
     public function index(): Response
     {
+        $articles = Article::query()
+            ->published()
+            ->latest('published_at')
+            ->paginate(15);
+
         return Inertia::render('Media/Index', [
-            'articles' => Article::query()
-                ->published()
-                ->latest('published_at')
-                ->paginate(15),
-            'head' => Seo::page(['title' => 'Haberler']),
+            'articles' => $articles,
+            // Boş liste ince içerik: dizine girmesin (sitemap'te de yok).
+            'head' => Seo::page(['title' => 'Haberler', 'noindex' => $articles->isEmpty()]),
         ]);
     }
 

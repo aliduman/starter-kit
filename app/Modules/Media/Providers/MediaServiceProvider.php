@@ -20,9 +20,14 @@ class MediaServiceProvider extends ServiceProvider
         $this->app->make(ScheduledCacheBoundaries::class)->register(Article::class, Article::publicationBoundaries());
 
         $this->app->make(Sitemap::class)->add(function () {
-            yield ['loc' => route('media.articles.index', absolute: false)];
+            $records = Article::query()->published()->get(['id', 'slug', 'updated_at']);
 
-            foreach (Article::query()->published()->get(['id', 'slug', 'updated_at']) as $record) {
+            // Boş liste sayfası ince içeriktir: sitemap'e girmez, sayfası da noindex.
+            if ($records->isNotEmpty()) {
+                yield ['loc' => route('media.articles.index', absolute: false)];
+            }
+
+            foreach ($records as $record) {
                 yield ['loc' => route('media.articles.show', $record->slug, absolute: false), 'lastmod' => $record->updated_at];
             }
         });

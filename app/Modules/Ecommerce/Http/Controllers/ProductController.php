@@ -12,9 +12,12 @@ class ProductController extends Controller
 {
     public function index(): Response
     {
+        $products = Product::query()->published()->paginate(24);
+
         return Inertia::render('Ecommerce/Index', [
-            'products' => Product::query()->published()->paginate(24),
-            'head' => Seo::page(['title' => 'Ürünler']),
+            'products' => $products,
+            // Boş liste ince içerik: dizine girmesin (sitemap'te de yok).
+            'head' => Seo::page(['title' => 'Ürünler', 'noindex' => $products->isEmpty()]),
         ]);
     }
 

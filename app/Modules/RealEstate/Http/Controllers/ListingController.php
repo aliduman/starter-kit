@@ -24,8 +24,9 @@ class ListingController extends Controller
         return Inertia::render('RealEstate/Index', [
             'listings' => $listings,
             'filters' => $request->only('type', 'city'),
-            // Süzgeçler aynı listenin görünümleridir; canonical'a girmez.
-            'head' => Seo::page(['title' => 'İlanlar']),
+            // Süzgeçler aynı listenin görünümleridir; canonical'a girmez. Boş liste ince içerik: dizine girmesin
+            // (sitemap'te de yok).
+            'head' => Seo::page(['title' => 'İlanlar', 'noindex' => $listings->isEmpty()]),
         ]);
     }
 

@@ -16,9 +16,14 @@ class RealEstateServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->app->make(Sitemap::class)->add(function () {
-            yield ['loc' => route('realestate.listings.index', absolute: false)];
+            $records = Listing::query()->published()->get(['id', 'slug', 'updated_at']);
 
-            foreach (Listing::query()->published()->get(['id', 'slug', 'updated_at']) as $record) {
+            // Boş liste sayfası ince içeriktir: sitemap'e girmez, sayfası da noindex.
+            if ($records->isNotEmpty()) {
+                yield ['loc' => route('realestate.listings.index', absolute: false)];
+            }
+
+            foreach ($records as $record) {
                 yield ['loc' => route('realestate.listings.show', $record->slug, absolute: false), 'lastmod' => $record->updated_at];
             }
         });

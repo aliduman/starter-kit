@@ -66,7 +66,7 @@ it('prints noindex and blocks robots.txt when the site is not indexable', functi
 it('prints index and lists the sitemap in robots.txt when indexable', function () {
     config(['seo.indexable' => true]);
 
-    get('/')->assertSee('content="index, follow"', false);
+    get('/')->assertSee('content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"', false);
     get('/robots.txt')->assertSee('Disallow: /admin')->assertSee('Sitemap: '.route('sitemap'));
 });
 
@@ -84,6 +84,29 @@ it('lists the published content of every enabled module in the sitemap', functio
         ->assertSee(route('corporate.pages.show', $page->slug))
         ->assertSee(route('ecommerce.products.show', $product->slug))
         ->assertDontSee(route('media.articles.show', $draft->slug));
+});
+
+it('keeps empty listing pages out of the index and the sitemap until they have content', function () {
+    config(['seo.indexable' => true]);
+
+    get(route('media.articles.index'))->assertSee('content="noindex, nofollow"', false);
+    get('/sitemap.xml')->assertDontSee('<loc>'.route('media.articles.index').'</loc>', false);
+
+    publishedArticle();
+
+    get(route('media.articles.index'))->assertSee('content="index, follow', false);
+    get('/sitemap.xml')->assertSee('<loc>'.route('media.articles.index').'</loc>', false);
+});
+
+it('redirects other schemes and hosts to the same path on APP_URL', function () {
+    config(['app.url' => 'https://site.test', 'seo.redirect_to_app_url' => true]);
+
+    get('http://site.test/haber?a=1')->assertStatus(301)->assertRedirect('https://site.test/haber?a=1');
+    get('https://www.site.test/')->assertStatus(301)->assertRedirect('https://site.test/');
+    get('https://site.test/')->assertOk();
+
+    config(['seo.redirect_to_app_url' => false]);
+    get('http://www.site.test/')->assertOk();
 });
 
 it('prints search engine verification meta tags from config', function () {
