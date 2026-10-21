@@ -23,9 +23,11 @@ Inertia SSR (`npm run build:ssr`) kalıcı Node ister; cPanel'de kullanılmaz. S
 
 Paketin içeriği `scripts/build-release.sh` ile tanımlıdır: commit'in temiz kopyası (commit'lenmemiş değişiklikler
 girmez), production `vendor/` (`composer install --no-dev`), derlenmiş `public/build` ve
-`bootstrap/cache/{packages,services}.php`. **Girmeyenler:** `.env`, `storage/`, testler, Docker/`deploy/` dosyaları,
-`.md` belgeleri. Bu yüzden paketi açmak sunucudaki ayarlara ve yüklenen dosyalara dokunmaz. Neyin pakete girmediği
-yalnızca script'teki `EXCLUDES` listesinde tanımlıdır.
+`bootstrap/cache/{packages,services}.php`. **Girmeyenler:** `.env`, `storage/` içeriği, testler, Docker/`deploy/`
+dosyaları, `.md` belgeleri. `storage/` yalnızca **boş klasör yapısı** olarak girer (`app/public`,
+`framework/{cache/data,sessions,views}`, `logs`; içlerinde yalnızca yer tutucu `.gitignore`): ilk kurulumda Laravel'in
+yazacağı klasörler hazır olur. Bu yüzden paketi açmak sunucudaki ayarlara, loglara ve yüklenen dosyalara dokunmaz. Neyin
+pakete girdiği ve girmediği yalnızca script'teki `STORAGE_SKELETON` ve `EXCLUDES` listelerinde tanımlıdır.
 
 Paketi almanın iki yolu var:
 
@@ -150,6 +152,7 @@ Sunucudaki proje klasöründe (`.env` dosyasının olduğu klasör), cPanel File
 
 | Sorun | Çözüm |
 |---|---|
+| `Please provide a valid cache path` | `storage/` klasörü yok (storage yapısını içermeyen eski bir paket açılmış). Güncel paketi açın ya da `storage/app/public`, `storage/framework/cache/data`, `storage/framework/sessions`, `storage/framework/views`, `storage/logs` klasörlerini oluşturup 755 yapın. |
 | Deploy sonrası 500 | `storage/logs/laravel.log`'a File Manager ile bakın (en yeni kayıtlar en altta); `/kurulum/{token}`'ı açtığınızdan emin olun. |
 | Sayfalar stilsiz / JS 404 | Response cache eski build'e işaret ediyor → `/kurulum/{token}`'ı tekrar açın. |
 | `/kurulum` 404 | `.env`'de `SETUP_TOKEN` yok, URL'deki token eşleşmiyor ya da config cache eski (`?cache=1` sonrası `.env` değiştiyse `bootstrap/cache/config.php`'yi silin). |
