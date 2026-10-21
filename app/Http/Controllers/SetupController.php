@@ -14,6 +14,9 @@ use Throwable;
  * Güvenlik: SETUP_TOKEN boşsa (varsayılan) yok sayılır, 404 döner; token sabit zamanlı karşılaştırılır, istek dakikada
  * 5 ile sınırlıdır. Production'da seed yalnızca SETUP_ADMIN_EMAIL/SETUP_ADMIN_PASSWORD verilmişse admin oluşturur
  * (DatabaseSeeder); bilinen varsayılan şifreli hesap açılmaz. İşi bitince SETUP_TOKEN'ı .env'den silin.
+ *
+ * ?seeders=demo,... config('app.setup_seeders') içinde adı geçen ek seeder'ları çalıştırır (örnek içerik gibi);
+ * production'da hiçbiri çalışmaz, listede olmayan ad yalnızca çıktıda raporlanır.
  */
 class SetupController extends Controller
 {
@@ -31,6 +34,11 @@ class SetupController extends Controller
         if ($request->boolean('seed')) {
             Artisan::call('db:seed', ['--force' => true]);
             $output[] = "== seed ==\n".Artisan::output();
+        }
+
+        $seeders = $request->query('seeders');
+        if (is_string($seeders) && $seeders !== '') {
+            $output[] = $this->runExtraSeeders(explode(',', $seeders));
         }
 
         try {
@@ -56,5 +64,29 @@ class SetupController extends Controller
         return response('<pre>'.e(implode("\n\n", $output)).'</pre>')
             ->header('X-Robots-Tag', 'noindex, nofollow')
             ->header('Cache-Control', 'no-store');
+    }
+
+    /** @param  list<string>  $names */
+    private function runExtraSeeders(array $names): string
+    {
+        if (app()->isProduction()) {
+            return '== ek seeder\'lar production\'da çalışmaz ==';
+        }
+
+        $available = config('app.setup_seeders', []);
+        $output = [];
+
+        foreach (array_unique(array_filter(array_map('trim', $names))) as $name) {
+            if (! isset($available[$name])) {
+                $output[] = "== {$name}: tanımsız seeder (config app.setup_seeders) ==";
+
+                continue;
+            }
+
+            Artisan::call('db:seed', ['--class' => $available[$name], '--force' => true]);
+            $output[] = "== seed: {$name} ==\n".Artisan::output();
+        }
+
+        return implode("\n\n", $output);
     }
 }

@@ -20,6 +20,11 @@ return [
         'email' => env('SETUP_ADMIN_EMAIL'),
         'password' => env('SETUP_ADMIN_PASSWORD'),
     ],
+
+    // /kurulum/{token}?seeders=ad1,ad2 ile çalıştırılabilen ek seeder'lar (ad => sınıf), ör. örnek içerik.
+    // Yalnızca production dışı ortamlarda çalışır.
+    'setup_seeders' => [],
+
     'previous_keys' => [
         ...array_filter(
             explode(',', (string) env('APP_PREVIOUS_KEYS', ''))

@@ -124,6 +124,11 @@ Sunucudaki proje klasöründe (`.env` dosyasının olduğu klasör), cPanel File
 6. **Migration + seed:** `https://alanadi.com/kurulum/SETUP_TOKEN?seed=1` → roller/izinler ve `SETUP_ADMIN_*` ile
    admin hesabı oluşur. Çıktıda `== seed ==` bölümü görünmeli. Sonra `.env`'den `SETUP_ADMIN_PASSWORD` ve
    `SETUP_TOKEN` değerlerini silin. Seed tekrar çalıştırılabilir, ama gerek yoksa `?seed=1` kullanmayın.
+
+   **Örnek içerik (test hostu):** sitenin `config/app.php` → `setup_seeders` listesine eklediği seeder'lar
+   `?seeders=ad` (virgülle birden fazla) ile çalışır, ör. `/kurulum/SETUP_TOKEN?seed=1&seeders=demo`. Çıktıda
+   `== seed: demo ==` görünür, listede olmayan ad raporlanıp atlanır. `APP_ENV=production` iken hiçbiri çalışmaz,
+   yani canlı veritabanına örnek veri giremez. Seeder'ları `firstOrCreate` ile yazın ki tekrar açmak kopya üretmesin.
 7. **storage:link:** `/kurulum` bunu dener. Host `symlink()`'i engelliyorsa çıktıda hata görünür; o durumda
    `public/storage` bağlantısını cPanel File Manager/destek ile oluşturun.
 8. **Cron:** cPanel → Cron Jobs → her dakika:

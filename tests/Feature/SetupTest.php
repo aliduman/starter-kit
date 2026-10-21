@@ -33,6 +33,31 @@ it('migrates and clears caches with the right token', function () {
         ->assertHeader('X-Robots-Tag', 'noindex, nofollow');
 });
 
+it('runs extra seeders named in config outside production', function () {
+    config(['app.setup_token' => 'dogru-token', 'app.setup_seeders' => ['demo' => DatabaseSeeder::class]]);
+    Artisan::shouldReceive('call')->with('db:seed', ['--class' => DatabaseSeeder::class, '--force' => true])->once();
+    Artisan::shouldReceive('call')->withAnyArgs();
+    Artisan::shouldReceive('output')->andReturn('');
+
+    get('/kurulum/dogru-token?seeders=demo,yok')
+        ->assertOk()
+        ->assertSee('== seed: demo ==')
+        ->assertSee('== yok: tanımsız seeder');
+});
+
+it('never runs extra seeders in production', function () {
+    app()->detectEnvironment(fn () => 'production');
+    config(['app.setup_token' => 'dogru-token', 'app.setup_seeders' => ['demo' => DatabaseSeeder::class]]);
+    Artisan::shouldReceive('call')->with('db:seed', Mockery::any())->never();
+    Artisan::shouldReceive('call')->withAnyArgs();
+    Artisan::shouldReceive('output')->andReturn('');
+
+    get('/kurulum/dogru-token?seeders=demo')
+        ->assertOk()
+        ->assertSee('production')
+        ->assertDontSee('== seed: demo ==');
+});
+
 it('creates no default admin when seeding production without SETUP_ADMIN_*', function () {
     app()->detectEnvironment(fn () => 'production');
 
