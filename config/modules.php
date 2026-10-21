@@ -1,5 +1,11 @@
 <?php
 
+use App\Modules\Announcements\Providers\AnnouncementsServiceProvider;
+use App\Modules\Corporate\Providers\CorporateServiceProvider;
+use App\Modules\Ecommerce\Providers\EcommerceServiceProvider;
+use App\Modules\Media\Providers\MediaServiceProvider;
+use App\Modules\RealEstate\Providers\RealEstateServiceProvider;
+
 return [
 
     /*
@@ -14,6 +20,8 @@ return [
     |
     | `prefix` is the URL prefix for the module's web routes; null/'' mounts
     | them at the site root. API routes are mounted under /api/{prefix|key}.
+    | `permission` is the admin permission its Filament resources require
+    | (default manage-{key}; roles in config/permissions.php).
     |
     */
 
@@ -25,7 +33,19 @@ return [
             'name' => 'Corporate',
             'description' => 'Kurumsal sayfalar, hakkımızda, iletişim.',
             'prefix' => env('MODULE_CORPORATE_PREFIX', ''),
-            'provider' => App\Modules\Corporate\Providers\CorporateServiceProvider::class,
+            // Sabit sayfaların adresleri (prefix'e göre); site kendi diliyle değiştirir (ör. 'iletisim').
+            'paths' => [
+                'about' => 'about',
+                'contact' => 'contact',
+                'pages' => 'pages',
+            ],
+            // İletişim formundaki konu seçenekleri (saklanan anahtar => görünen ad).
+            'contact_subjects' => [
+                'general' => 'Genel',
+                'support' => 'Destek',
+                'partnership' => 'İş birliği',
+            ],
+            'provider' => CorporateServiceProvider::class,
         ],
 
         'ecommerce' => [
@@ -35,7 +55,7 @@ return [
             'description' => 'Ürün kataloğu, sepet, ödeme (Stripe + iyzico).',
             'prefix' => env('MODULE_ECOMMERCE_PREFIX', 'shop'),
             'default_gateway' => env('ECOMMERCE_DEFAULT_GATEWAY', 'stripe'),
-            'provider' => App\Modules\Ecommerce\Providers\EcommerceServiceProvider::class,
+            'provider' => EcommerceServiceProvider::class,
         ],
 
         'realestate' => [
@@ -44,7 +64,7 @@ return [
             'name' => 'Real Estate',
             'description' => 'Emlak ilanları, arama, filtreleme.',
             'prefix' => env('MODULE_REALESTATE_PREFIX', 'emlak'),
-            'provider' => App\Modules\RealEstate\Providers\RealEstateServiceProvider::class,
+            'provider' => RealEstateServiceProvider::class,
         ],
 
         'media' => [
@@ -53,7 +73,16 @@ return [
             'name' => 'Media',
             'description' => 'Haber, makale, kategori, etiket.',
             'prefix' => env('MODULE_MEDIA_PREFIX', 'haber'),
-            'provider' => App\Modules\Media\Providers\MediaServiceProvider::class,
+            'provider' => MediaServiceProvider::class,
+        ],
+
+        'announcements' => [
+            'enabled' => env('MODULE_ANNOUNCEMENTS_ENABLED', true),
+            'namespace' => 'Announcements',
+            'name' => 'Announcements',
+            'description' => 'Duyurular: liste, detay ve ana sayfa bölümü.',
+            'prefix' => env('MODULE_ANNOUNCEMENTS_PREFIX', 'duyurular'),
+            'provider' => AnnouncementsServiceProvider::class,
         ],
 
     ],

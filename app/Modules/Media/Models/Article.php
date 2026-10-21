@@ -2,6 +2,9 @@
 
 namespace App\Modules\Media\Models;
 
+use App\Models\Category;
+use App\Models\Concerns\HasTags;
+use App\Models\Concerns\LogsActivity;
 use App\Models\User;
 use App\Support\Content\Publishable;
 use App\Support\ResponseCache\Concerns\InvalidatesResponseCache;
@@ -17,9 +20,14 @@ class Article extends Model implements HasMedia
 {
     use HasFactory;
     use HasSlug;
+    use HasTags;
     use InteractsWithMedia;
     use InvalidatesResponseCache;
+    use LogsActivity;
     use Publishable;
+
+    /** Ortak kategori tablosundaki türü (App\Support\Taxonomy\CategoryTypes). */
+    public const CATEGORY_TYPE = 'media';
 
     protected string $publishedAtColumn = 'published_at';
 
@@ -27,14 +35,15 @@ class Article extends Model implements HasMedia
 
     protected $fillable = [
         'author_id',
+        'category_id',
         'title',
         'slug',
         'excerpt',
         'body',
-        'category',
-        'tags',
         'is_published',
         'published_at',
+        'meta_title',
+        'meta_description',
     ];
 
     protected function casts(): array
@@ -42,7 +51,6 @@ class Article extends Model implements HasMedia
         return [
             'is_published' => 'boolean',
             'published_at' => 'datetime',
-            'tags' => 'array',
         ];
     }
 
@@ -56,5 +64,10 @@ class Article extends Model implements HasMedia
     public function author(): BelongsTo
     {
         return $this->belongsTo(User::class, 'author_id');
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class);
     }
 }

@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\MenuItem;
+use App\Models\Setting;
 use App\Support\Modules;
 use App\Support\Seo\Seo;
 use Illuminate\Http\Request;
@@ -22,9 +24,12 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'app' => [
-                'name' => config('app.name'),
+                'name' => fn () => Setting::get('site_name', config('app.name')),
                 'locale' => app()->getLocale(),
             ],
+            // Panelde düzenlenen herkese açık ayarlar (iletişim, sosyal hesaplar...) ve menüler (config/menus.php).
+            'settings' => fn () => Setting::publicValues(),
+            'menus' => fn () => MenuItem::forFrontend(),
             // Varsayılan SEO etiketleri; sayfalar kendi `head` prop'unu (Seo::page) gönderince bu ezilir.
             'head' => Seo::page(),
             // Çerez onayından sonra yüklenen ölçüm araçları (resources/js/analytics.js).

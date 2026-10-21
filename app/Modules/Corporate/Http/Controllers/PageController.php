@@ -17,8 +17,8 @@ class PageController extends Controller
         return Inertia::render('Corporate/PageShow', [
             'page' => $page,
             'head' => Seo::page([
-                'title' => $page->title,
-                'description' => $page->excerpt ?: $page->body,
+                'title' => $page->meta_title ?: $page->title,
+                'description' => $page->meta_description ?: ($page->excerpt ?: $page->body),
                 'modified_time' => $page->updated_at,
             ]),
         ]);
@@ -28,13 +28,6 @@ class PageController extends Controller
     {
         return Inertia::render('Corporate/About', [
             'head' => Seo::page(['title' => 'Hakkımızda']),
-        ]);
-    }
-
-    public function contact(): Response
-    {
-        return Inertia::render('Corporate/Contact', [
-            'head' => Seo::page(['title' => 'İletişim']),
         ]);
     }
 

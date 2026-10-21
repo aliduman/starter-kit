@@ -1,8 +1,10 @@
 <script setup>
 import { Link } from '@inertiajs/vue3';
 import Card from '~shared/Card.vue';
+import HomepageSections from '~shared/HomepageSections.vue';
 
 defineProps({
+    sections: { type: Array, default: () => [] },
     modules: { type: Array, required: true },
 });
 
@@ -54,6 +56,8 @@ const benefits = [
             </a>
         </div>
     </section>
+
+    <HomepageSections :sections="sections" />
 
     <section class="pb-16">
         <div class="mb-8 text-center">

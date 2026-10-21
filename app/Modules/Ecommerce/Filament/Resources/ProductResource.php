@@ -2,6 +2,7 @@
 
 namespace App\Modules\Ecommerce\Filament\Resources;
 
+use App\Filament\Concerns\ChecksPermission;
 use App\Modules\Ecommerce\Filament\Resources\ProductResource\Pages;
 use App\Modules\Ecommerce\Models\Product;
 use Filament\Actions;
@@ -13,6 +14,8 @@ use Filament\Tables\Table;
 
 class ProductResource extends Resource
 {
+    use ChecksPermission;
+
     protected static ?string $model = Product::class;
 
     protected static string|\UnitEnum|null $navigationGroup = 'E-Commerce';

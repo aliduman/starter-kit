@@ -4,8 +4,10 @@ namespace App\Modules\Corporate\Providers;
 
 use App\Modules\Corporate\Models\Page;
 use App\Support\ResponseCache\ScheduledCacheBoundaries;
+use App\Support\Search\SearchSources;
 use App\Support\Seo\Sitemap;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Str;
 
 class CorporateServiceProvider extends ServiceProvider
 {
@@ -27,5 +29,16 @@ class CorporateServiceProvider extends ServiceProvider
                 yield ['loc' => route('corporate.pages.show', $record->slug, absolute: false), 'lastmod' => $record->updated_at];
             }
         });
+
+        $this->app->make(SearchSources::class)->register('pages', 'Sayfalar', fn (string $term, int $limit) => Page::query()
+            ->published()
+            ->whereAny(['title', 'excerpt', 'body'], 'like', "%{$term}%")
+            ->limit($limit)
+            ->get()
+            ->map(fn (Page $page) => [
+                'title' => $page->title,
+                'url' => route('corporate.pages.show', $page->slug, absolute: false),
+                'excerpt' => Str::limit(strip_tags($page->excerpt ?: (string) $page->body), 160),
+            ]));
     }
 }

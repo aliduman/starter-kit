@@ -2,6 +2,7 @@
 
 namespace App\Modules\RealEstate\Filament\Resources;
 
+use App\Filament\Concerns\ChecksPermission;
 use App\Modules\RealEstate\Filament\Resources\ListingResource\Pages;
 use App\Modules\RealEstate\Models\Listing;
 use Filament\Actions;
@@ -13,6 +14,8 @@ use Filament\Tables\Table;
 
 class ListingResource extends Resource
 {
+    use ChecksPermission;
+
     protected static ?string $model = Listing::class;
 
     protected static string|\UnitEnum|null $navigationGroup = 'Real Estate';

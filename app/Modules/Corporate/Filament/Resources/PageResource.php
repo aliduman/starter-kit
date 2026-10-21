@@ -2,17 +2,21 @@
 
 namespace App\Modules\Corporate\Filament\Resources;
 
+use App\Filament\Concerns\ChecksPermission;
 use App\Modules\Corporate\Filament\Resources\PageResource\Pages;
 use App\Modules\Corporate\Models\Page;
 use Filament\Actions;
 use Filament\Forms;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
 
 class PageResource extends Resource
 {
+    use ChecksPermission;
+
     protected static ?string $model = Page::class;
 
     protected static string|\UnitEnum|null $navigationGroup = 'Corporate';
@@ -28,6 +32,10 @@ class PageResource extends Resource
             Forms\Components\RichEditor::make('body')->columnSpanFull(),
             Forms\Components\Toggle::make('is_published'),
             Forms\Components\DateTimePicker::make('published_at'),
+            Section::make('SEO')->schema([
+                Forms\Components\TextInput::make('meta_title')->label('Meta başlık'),
+                Forms\Components\Textarea::make('meta_description')->label('Meta açıklama')->rows(2),
+            ])->collapsed(),
         ]);
     }
 

@@ -3,10 +3,13 @@ import { Link, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import NavBar from '~shared/NavBar.vue';
 import CookieConsent from '~shared/CookieConsent.vue';
+import AudioBar from '~shared/AudioBar.vue';
+import { usePlayerStore } from '@/Stores/player';
 import { hasTrackers, preferencesOpen } from '@/analytics';
 
 const page = usePage();
 const flash = computed(() => page.props.flash || {});
+const player = usePlayerStore();
 
 const openCookiePreferences = () => {
     preferencesOpen.value = true;
@@ -14,7 +17,7 @@ const openCookiePreferences = () => {
 </script>
 
 <template>
-    <div class="min-h-screen flex flex-col">
+    <div class="min-h-screen flex flex-col" :class="{ 'pb-20': player.track }">
         <NavBar />
 
         <main class="flex-1 mx-auto w-full max-w-7xl px-4 py-10">
@@ -40,6 +43,7 @@ const openCookiePreferences = () => {
             </div>
         </footer>
 
+        <AudioBar />
         <CookieConsent />
     </div>
 </template>

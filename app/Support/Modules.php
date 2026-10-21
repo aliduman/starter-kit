@@ -41,6 +41,25 @@ class Modules
         return (bool) config("modules.list.{$key}.enabled", false);
     }
 
+    /** Modülün panel izni (config `permission`, varsayılan manage-{anahtar}). */
+    public static function permission(string $key): string
+    {
+        return config("modules.list.{$key}.permission") ?? 'manage-'.$key;
+    }
+
+    /** Sınıfın ait olduğu modülün anahtarı (App\Modules\{Namespace}\...); modül dışı sınıf için null. */
+    public static function keyOf(string $class): ?string
+    {
+        if (! str_starts_with($class, 'App\\Modules\\')) {
+            return null;
+        }
+
+        $namespace = explode('\\', $class)[2] ?? null;
+        $key = collect(static::all())->search(fn (array $module) => $module['namespace'] === $namespace);
+
+        return $key === false ? null : $key;
+    }
+
     public static function path(array $module, string $relative = ''): string
     {
         return app_path('Modules/'.$module['namespace'].($relative !== '' ? '/'.$relative : ''));

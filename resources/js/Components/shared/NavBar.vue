@@ -5,13 +5,20 @@ import { computed } from 'vue';
 const page = usePage();
 const modules = computed(() => page.props.modules || {});
 
-const links = computed(() => [
+// Paneldeki ana menü (config/menus.php `main`); henüz öğe yoksa modüllere göre varsayılan bağlantılar.
+const menu = computed(() => page.props.menus?.main || []);
+
+const fallback = computed(() => [
     { label: 'Anasayfa', href: '/', show: true },
     { label: 'Hakkımızda', href: '/about', show: modules.value?.corporate?.enabled },
     { label: 'Mağaza', href: '/shop', show: modules.value?.ecommerce?.enabled },
     { label: 'Emlak', href: '/emlak', show: modules.value?.realestate?.enabled },
     { label: 'Haberler', href: '/haber', show: modules.value?.media?.enabled },
 ]);
+
+const links = computed(() => (menu.value.length
+    ? menu.value.map((item) => ({ label: item.title, href: item.href, target: item.target, show: true }))
+    : fallback.value));
 </script>
 
 <template>
@@ -22,12 +29,15 @@ const links = computed(() => [
             </Link>
             <ul class="flex items-center gap-1 text-sm">
                 <li v-for="link in links.filter(l => l.show)" :key="link.href">
-                    <Link
-                        :href="link.href"
-                        class="btn-ghost"
-                    >
+                    <a v-if="link.target === '_blank'" :href="link.href" target="_blank" rel="noopener" class="btn-ghost">
+                        {{ link.label }}
+                    </a>
+                    <Link v-else :href="link.href" class="btn-ghost">
                         {{ link.label }}
                     </Link>
+                </li>
+                <li>
+                    <Link :href="route('search')" class="btn-ghost" aria-label="Ara">Ara</Link>
                 </li>
                 <li v-if="!$page.props.auth.user" class="ml-2">
                     <Link href="/login" class="btn-primary">Giriş</Link>

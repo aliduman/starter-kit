@@ -69,6 +69,36 @@ lowercase percent-encoding in `UrlGenerator`, `HasSlugPath` (nested page paths; 
 needs `/a/b` paths). Also not ported: trusted proxies (Cloudflare deferred), Şahid's Media-module features (RSS feed,
 view beacon, ads).
 
+## Shared core (2026-10-21)
+
+Generic versions of Şahid's Media-module site pieces, moved out of any module so every site (Özel FM first) gets them.
+Registries are singletons filled from module providers, like `Sitemap`/`ContentPaths`. Şahid hasn't switched to these
+yet; when it does, these names and tables win.
+
+- Settings: `App\Models\Setting` (`settings` key/value) with fields declared in `App\Support\Settings\SettingFields`
+  (label, group, type, default, `public`). Admin page `App\Filament\Pages\ManageSettings` builds its form from the
+  registry. Public values are shared as the `settings` prop; core fields feed `Seo` defaults (site name, sameAs, GA4,
+  verification). Site name also replaces `app.name`.
+- Menus: `App\Models\MenuItem` (`menu_items`), locations and seed items in `config/menus.php`, shared as `menus`.
+- Homepage: `App\Support\Homepage\HomepageBlocks` (modules register key, label, data closure, admin fields under
+  `settings.*`); `homepage_sections` holds order and visibility. Vue: `resources/js/Blocks/{StudlyKey}.vue`, rendered
+  by `~shared/HomepageSections.vue`. Blocks of disabled modules drop out.
+- Taxonomy and people: one `categories` table with `type` (`App\Support\Taxonomy\CategoryTypes`), `tags` + `taggables`
+  (`HasTags`), `people` (`App\Models\Person`; the module that links a person owns their public page). Media articles
+  now use `category_id`, tags and `meta_title`/`meta_description` (Şahid's column style; Corporate pages too).
+- Search: `App\Support\Search\SearchSources`, page `/arama` (noindex), advertised as the schema SearchAction.
+- Forms: `honeypot` middleware (`RejectHoneypot`, Vue `~shared/HoneypotField.vue`) + `throttle:5,1` + KVKK
+  `consent` → `consented_at`. Corporate contact form stores `ContactMessage` (subjects in module config
+  `contact_subjects`); Corporate paths are configurable (`paths.about|contact|pages`).
+- Player: Pinia `Stores/player.js` + `~shared/AudioBar.vue` in the persistent layout; plays files or live streams
+  (`live: true` reconnects with backoff).
+- Activity log: `LogsActivity` trait → `activity_log`, read-only `ActivityResource`.
+- Permissions: `config/permissions.php` (core permissions, roles); each module's permission is
+  `config/modules.php` `permission` (default `manage-{key}`). Resources `use ChecksPermission`; super-admin passes
+  every gate. Panel access = any configured role.
+- Announcements module (`/duyurular`): publishable with `ends_at` (off the homepage block, still in the archive).
+- Admin image uploads use `filament/spatie-laravel-media-library-plugin` (same as Şahid).
+
 Starter-kit-only pieces that Şahid lacks and are worth keeping: Breeze-style auth (`app/Http/Controllers/Auth`,
 `routes/auth.php`, `Pages/Auth`), an SSR entry (`resources/js/ssr.js`, `npm run build:ssr`), Ziggy (`@routes` +
 `ZiggyVue`), the Ecommerce and RealEstate modules, and Filament resources for every module.

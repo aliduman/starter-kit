@@ -26,18 +26,18 @@ class ArticleController extends Controller
 
     public function show(string $slug): Response
     {
-        $article = Article::query()->published()->with('author')->where('slug', $slug)->firstOrFail();
+        $article = Article::query()->published()->with(['author', 'category', 'tags'])->where('slug', $slug)->firstOrFail();
 
         return Inertia::render('Media/Show', [
             'article' => $article,
             'head' => Seo::page([
-                'title' => $article->title,
-                'description' => $article->excerpt ?: $article->body,
+                'title' => $article->meta_title ?: $article->title,
+                'description' => $article->meta_description ?: ($article->excerpt ?: $article->body),
                 'type' => 'article',
                 'published_time' => $article->published_at,
                 'modified_time' => $article->updated_at,
                 'author' => $article->author?->name,
-                'section' => $article->category,
+                'section' => $article->category?->name,
                 'schema' => [array_filter([
                     '@type' => 'Article',
                     'headline' => $article->title,

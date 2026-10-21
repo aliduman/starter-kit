@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\HomepageSection;
+use App\Models\MenuItem;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -12,6 +14,13 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call(RolesAndPermissionsSeeder::class);
+
+        // Menü ve ana sayfa bölümlerinin ilk hali; var olan kayıtlara dokunulmaz.
+        foreach (config('menus.defaults', []) as $location => $items) {
+            MenuItem::installDefaults($location, $items);
+        }
+
+        HomepageSection::installDefaults();
 
         // Production'da bilinen şifreli varsayılan hesap açılmaz: admin .env'deki SETUP_ADMIN_* ile oluşur.
         $email = config('app.setup_admin.email') ?? (app()->isProduction() ? null : 'admin@example.com');

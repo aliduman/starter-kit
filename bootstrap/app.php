@@ -4,6 +4,7 @@ use App\Http\Middleware\EnforceTrailingSlash;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\RedirectLegacyUrls;
 use App\Http\Middleware\RedirectToAppUrl;
+use App\Http\Middleware\RejectHoneypot;
 use App\Support\Routing\TrailingSlash;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -40,6 +41,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'cacheResponse' => CacheResponse::class,
             'doNotCacheResponse' => DoNotCacheResponse::class,
             TrailingSlash::MIDDLEWARE => EnforceTrailingSlash::class,
+            'honeypot' => RejectHoneypot::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

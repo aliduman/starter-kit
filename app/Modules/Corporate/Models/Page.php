@@ -2,6 +2,7 @@
 
 namespace App\Modules\Corporate\Models;
 
+use App\Models\Concerns\LogsActivity;
 use App\Support\Content\Publishable;
 use App\Support\ResponseCache\Concerns\InvalidatesResponseCache;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,6 +18,7 @@ class Page extends Model implements HasMedia
     use HasSlug;
     use InteractsWithMedia;
     use InvalidatesResponseCache;
+    use LogsActivity;
     use Publishable;
 
     protected string $publishedAtColumn = 'published_at';
@@ -30,7 +32,8 @@ class Page extends Model implements HasMedia
         'body',
         'is_published',
         'published_at',
-        'seo',
+        'meta_title',
+        'meta_description',
     ];
 
     protected function casts(): array
@@ -38,7 +41,6 @@ class Page extends Model implements HasMedia
         return [
             'is_published' => 'boolean',
             'published_at' => 'datetime',
-            'seo' => 'array',
         ];
     }
 

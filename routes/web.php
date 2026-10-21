@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ContentPathController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SetupController;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Support\Routing\ContentPaths;
@@ -33,6 +34,9 @@ Route::get('/robots.txt', fn () => response(
         ? implode("\n", ['User-agent: *', 'Disallow: /'.config('filament.path'), 'Disallow: /livewire', 'Disallow: /api', '', 'Sitemap: '.route('sitemap')])."\n"
         : "User-agent: *\nDisallow: /\n",
 )->header('Content-Type', 'text/plain; charset=UTF-8'))->name('robots');
+
+// Site araması: kaynakları modüller App\Support\Search\SearchSources'a kaydeder; sonuç sayfaları dizine girmez.
+Route::get('/arama', SearchController::class)->middleware(TrailingSlash::MIDDLEWARE)->name('search');
 
 require __DIR__.'/auth.php';
 
