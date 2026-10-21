@@ -11,7 +11,7 @@ it('serves root content paths from module resolvers after static routes', functi
         : null);
 
     get('/merhaba/dunya')->assertOk()->assertSee('kök içerik: merhaba/dunya');
-    get('/about')->assertOk()->assertInertia(fn ($page) => $page->component('Corporate/About'));
+    get(route('corporate.about', absolute: false))->assertOk()->assertInertia(fn ($page) => $page->component('Corporate/About'));
     get('/bilinmeyen')->assertNotFound();
 });
 

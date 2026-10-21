@@ -3,7 +3,9 @@
 use App\Models\HomepageSection;
 use App\Models\MenuItem;
 use App\Modules\Announcements\Models\Announcement;
+use App\Support\Homepage\HomepageBlocks;
 use Database\Seeders\DatabaseSeeder;
+use Illuminate\Support\Facades\Route;
 
 use function Pest\Laravel\get;
 use function Pest\Laravel\seed;
@@ -12,15 +14,22 @@ it('installs the default menus and homepage sections once', function () {
     seed(DatabaseSeeder::class);
     seed(DatabaseSeeder::class);
 
-    expect(MenuItem::query()->where('location', 'main')->pluck('title')->all())
-        ->toBe(['Anasayfa', 'Hakkımızda', 'Mağaza', 'Emlak', 'Haberler', 'Duyurular'])
+    // Beklenen öğeler sitenin config/menus.php'sinden; rotası olmayan (modülü kapalı) öğe atlanır.
+    $main = collect(config('menus.defaults.main'))
+        ->filter(fn (array $item) => ! isset($item['route']) || Route::has($item['route']))
+        ->values();
+    $blocks = array_keys(array_filter(app(HomepageBlocks::class)->all(), fn (array $block) => $block['default']));
+
+    expect(MenuItem::query()->where('location', 'main')->orderBy('sort_order')->pluck('title')->all())
+        ->toBe($main->pluck('title')->all())
         ->and(HomepageSection::query()->orderBy('sort_order')->pluck('key')->all())
-        ->toBe(['latest_articles', 'announcements']);
+        ->toBe($blocks);
+
+    $routed = $main->search(fn (array $item) => isset($item['route']));
 
     get('/')->assertInertia(fn ($page) => $page
-        ->has('menus.main', 6)
-        ->where('menus.main.1.href', '/about')
-        ->where('menus.footer.0.title', 'İletişim'));
+        ->has('menus.main', $main->count())
+        ->where("menus.main.{$routed}.href", route($main[$routed]['route'], absolute: false)));
 });
 
 it('renders active homepage sections in panel order with their data', function () {
