@@ -3,12 +3,13 @@
 namespace App\Modules\Corporate\Filament\Resources;
 
 use App\Filament\Concerns\ChecksPermission;
+use App\Filament\Seo\SeoScoreColumn;
+use App\Filament\Seo\SeoSection;
 use App\Modules\Corporate\Filament\Resources\PageResource\Pages;
 use App\Modules\Corporate\Models\Page;
 use Filament\Actions;
 use Filament\Forms;
 use Filament\Resources\Resource;
-use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -19,23 +20,24 @@ class PageResource extends Resource
 
     protected static ?string $model = Page::class;
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Corporate';
+    protected static ?string $modelLabel = 'Sayfa';
+
+    protected static ?string $pluralModelLabel = 'Sayfalar';
+
+    protected static string|\UnitEnum|null $navigationGroup = 'Kurumsal';
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-document-text';
 
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
-            Forms\Components\TextInput::make('title')->required()->maxLength(255),
-            Forms\Components\TextInput::make('slug')->maxLength(255),
-            Forms\Components\Textarea::make('excerpt')->rows(3),
-            Forms\Components\RichEditor::make('body')->columnSpanFull(),
-            Forms\Components\Toggle::make('is_published'),
-            Forms\Components\DateTimePicker::make('published_at'),
-            Section::make('SEO')->schema([
-                Forms\Components\TextInput::make('meta_title')->label('Meta başlık'),
-                Forms\Components\Textarea::make('meta_description')->label('Meta açıklama')->rows(2),
-            ])->collapsed(),
+            Forms\Components\TextInput::make('title')->label('Başlık')->required()->maxLength(255)->live(onBlur: true),
+            Forms\Components\TextInput::make('slug')->label('Adres')->maxLength(255)->live(onBlur: true),
+            Forms\Components\Textarea::make('excerpt')->label('Özet')->rows(3)->live(onBlur: true),
+            Forms\Components\RichEditor::make('body')->label('Metin')->live(onBlur: true)->columnSpanFull(),
+            Forms\Components\Toggle::make('is_published')->label('Yayında'),
+            Forms\Components\DateTimePicker::make('published_at')->label('Yayın tarihi'),
+            SeoSection::make(),
         ]);
     }
 
@@ -43,13 +45,14 @@ class PageResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('title')->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('slug')->toggleable(),
-                Tables\Columns\IconColumn::make('is_published')->boolean(),
-                Tables\Columns\TextColumn::make('updated_at')->dateTime()->sortable(),
+                Tables\Columns\TextColumn::make('title')->label('Başlık')->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('slug')->label('Adres')->toggleable(),
+                Tables\Columns\IconColumn::make('is_published')->label('Yayında')->boolean(),
+                Tables\Columns\TextColumn::make('updated_at')->label('Güncellendi')->dateTime()->sortable(),
+                SeoScoreColumn::make(),
             ])
             ->filters([
-                Tables\Filters\TernaryFilter::make('is_published'),
+                Tables\Filters\TernaryFilter::make('is_published')->label('Yayında'),
             ])
             ->recordActions([
                 Actions\EditAction::make(),

@@ -19,6 +19,9 @@ class Setting extends Model
 
     protected $fillable = ['key', 'value'];
 
+    /** İşlem geçmişinde kayıt türü (panelde kaynağı yok, ayarlar sayfasından değişir). */
+    public string $activityLabel = 'Site ayarı';
+
     protected static function booted(): void
     {
         static::saved(fn () => Cache::forget(self::CACHE_KEY));

@@ -8,6 +8,9 @@ use App\Models\Concerns\LogsActivity;
 use App\Models\User;
 use App\Support\Content\Publishable;
 use App\Support\ResponseCache\Concerns\InvalidatesResponseCache;
+use App\Support\Seo\Analysis\HasSeoAnalysis;
+use App\Support\Seo\Analysis\SeoAnalyzable;
+use App\Support\Seo\Analysis\SeoSubject;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -16,9 +19,10 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
 
-class Article extends Model implements HasMedia
+class Article extends Model implements HasMedia, SeoAnalyzable
 {
     use HasFactory;
+    use HasSeoAnalysis;
     use HasSlug;
     use HasTags;
     use InteractsWithMedia;
@@ -44,6 +48,7 @@ class Article extends Model implements HasMedia
         'published_at',
         'meta_title',
         'meta_description',
+        'focus_keyword',
     ];
 
     protected function casts(): array
@@ -59,6 +64,23 @@ class Article extends Model implements HasMedia
         return SlugOptions::create()
             ->generateSlugsFrom('title')
             ->saveSlugsTo('slug');
+    }
+
+    public function getUrlAttribute(): string
+    {
+        return route('media.articles.show', $this->slug, absolute: false);
+    }
+
+    /** Başlık ve açıklama yayın sayfasındakiyle aynı kurallardan gelir (ArticleController::show). */
+    public function seoSubject(): SeoSubject
+    {
+        return $this->makeSeoSubject(
+            title: $this->meta_title ?: $this->title,
+            slugSource: (string) $this->title,
+            metaDescription: $this->meta_description,
+            fallbackDescription: $this->excerpt ?: $this->body,
+            html: (string) $this->body,
+        );
     }
 
     public function author(): BelongsTo

@@ -25,6 +25,13 @@ return [
     // Yalnızca production dışı ortamlarda çalışır.
     'setup_seeders' => [],
 
+    // /kurulum'un altında uyardığı yamalı PHP sürümleri, dal => en düşük sürüm (App\Support\PhpVersionCheck). PHP bir
+    // güvenlik sürümü çıkardığında güncelleyin. 8.4.27 / 8.5.12: PHP2Shell (CVE-2026-109618, CVE-2026-109619).
+    'php_security_minimums' => [
+        '8.4' => '8.4.27',
+        '8.5' => '8.5.12',
+    ],
+
     'previous_keys' => [
         ...array_filter(
             explode(',', (string) env('APP_PREVIOUS_KEYS', ''))

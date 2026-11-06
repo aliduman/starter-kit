@@ -7,7 +7,7 @@
 # Commit'in temiz bir kopyasından (git archive; commit'lenmemiş değişiklikler girmez) production vendor/
 # (composer --no-dev) ve derlenmiş asset'ler (npm run build) hazırlanır. Sunucuya ait olanlar (.env, storage)
 # ve geliştirme dosyaları pakete girmez; storage/ yalnızca boş klasör yapısı olarak girer. Çıktı:
-# <çıktı>/<ad>-release-<sha>/ ve aynı adlı .zip.
+# <çıktı>/<ad>-release-<sha>.zip; önceki sürüm paketleri silinir (CI'da açılmış klasör de kalır).
 # CI (.github/workflows/release.yml) de bu script'i kullanır; paket içeriği tek yerde tanımlıdır.
 
 set -euo pipefail
@@ -17,7 +17,8 @@ REF="${1:-HEAD}"
 OUT="${2:-$ROOT/..}"
 SHA="$(git -C "$ROOT" rev-parse --short "$REF")"
 # Paket adı: RELEASE_NAME (varsayılan: proje klasörünün adı).
-NAME="${RELEASE_NAME:-$(basename "$ROOT")}-release-$SHA"
+PREFIX="${RELEASE_NAME:-$(basename "$ROOT")}-release"
+NAME="$PREFIX-$SHA"
 
 # storage/ yalnızca boş klasör yapısıyla (yer tutucu .gitignore dosyaları) girer: ilk kurulumda Laravel'in yazacağı
 # klasörler hazır olur, sonraki deploy'larda paket sunucudaki log, cache ve yüklemelere dokunmaz. Bu kurallar EXCLUDES'tan
@@ -56,4 +57,9 @@ rm -rf "${OUT:?}/$NAME" "$OUT/$NAME.zip"
 rsync -a "${STORAGE_SKELETON[@]}" "${EXCLUDES[@]/#/--exclude=}" "$WORK/src/" "$OUT/$NAME/"
 (cd "$OUT/$NAME" && zip -rqX "$OUT/$NAME.zip" .)
 
-echo "==> $OUT/$NAME.zip ($(du -h "$OUT/$NAME.zip" | cut -f1), $(find "$OUT/$NAME" -type f | wc -l | tr -d ' ') dosya)"
+# Çıktı klasöründe yalnızca yeni zip kalır: önceki sürümlerin zip/klasörleri ve açılmış kopya silinir. CI'da açılmış
+# kopya kalır, çünkü release.yml artifact olarak onu yükler.
+find "$OUT" -maxdepth 1 -name "$PREFIX-*" ! -name "$NAME" ! -name "$NAME.zip" -exec rm -rf {} +
+[ -n "${CI:-}" ] || rm -rf "${OUT:?}/$NAME"
+
+echo "==> $OUT/$NAME.zip ($(du -h "$OUT/$NAME.zip" | cut -f1), $(zipinfo -1 "$OUT/$NAME.zip" | grep -vc '/$') dosya)"

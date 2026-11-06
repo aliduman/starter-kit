@@ -18,21 +18,25 @@ class ProductResource extends Resource
 
     protected static ?string $model = Product::class;
 
-    protected static string|\UnitEnum|null $navigationGroup = 'E-Commerce';
+    protected static ?string $modelLabel = 'Ürün';
+
+    protected static ?string $pluralModelLabel = 'Ürünler';
+
+    protected static string|\UnitEnum|null $navigationGroup = 'E-Ticaret';
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-shopping-bag';
 
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
-            Forms\Components\TextInput::make('name')->required(),
-            Forms\Components\TextInput::make('sku'),
-            Forms\Components\TextInput::make('price')->numeric()->required(),
-            Forms\Components\TextInput::make('compare_price')->numeric(),
-            Forms\Components\TextInput::make('currency')->default('TRY')->maxLength(3),
-            Forms\Components\TextInput::make('stock')->numeric()->default(0),
-            Forms\Components\Textarea::make('description')->columnSpanFull(),
-            Forms\Components\Toggle::make('is_active')->default(true),
+            Forms\Components\TextInput::make('name')->label('Ad')->required(),
+            Forms\Components\TextInput::make('sku')->label('Stok kodu'),
+            Forms\Components\TextInput::make('price')->label('Fiyat')->numeric()->required(),
+            Forms\Components\TextInput::make('compare_price')->label('İndirimsiz fiyat')->numeric(),
+            Forms\Components\TextInput::make('currency')->label('Para birimi')->default('TRY')->maxLength(3),
+            Forms\Components\TextInput::make('stock')->label('Stok')->numeric()->default(0),
+            Forms\Components\Textarea::make('description')->label('Açıklama')->columnSpanFull(),
+            Forms\Components\Toggle::make('is_active')->label('Aktif')->default(true),
         ]);
     }
 
@@ -40,11 +44,11 @@ class ProductResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('sku')->toggleable(),
-                Tables\Columns\TextColumn::make('price')->money('TRY'),
-                Tables\Columns\TextColumn::make('stock')->numeric(),
-                Tables\Columns\IconColumn::make('is_active')->boolean(),
+                Tables\Columns\TextColumn::make('name')->label('Ad')->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('sku')->label('Stok kodu')->toggleable(),
+                Tables\Columns\TextColumn::make('price')->label('Fiyat')->money('TRY'),
+                Tables\Columns\TextColumn::make('stock')->label('Stok')->numeric(),
+                Tables\Columns\IconColumn::make('is_active')->label('Aktif')->boolean(),
             ])
             ->recordActions([
                 Actions\EditAction::make(),

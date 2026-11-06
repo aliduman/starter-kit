@@ -1,0 +1,12 @@
+{
+    "Unauthorized": "Yetkisiz erişim",
+    "Payment Required": "Ödeme gerekli",
+    "Forbidden": "Erişim engellendi",
+    "This action is unauthorized.": "Bu işlem için yetkiniz yok.",
+    "Not Found": "Sayfa bulunamadı",
+    "Page Expired": "Sayfanın süresi doldu",
+    "Too Many Requests": "Çok fazla istek. Lütfen biraz sonra tekrar deneyin.",
+    "Server Error": "Sunucu hatası",
+    "Service Unavailable": "Hizmet kullanılamıyor",
+    "This page has expired. Would you like to refresh the page?": "Bu sayfanın süresi doldu. Sayfayı yenilemek ister misiniz?"
+}

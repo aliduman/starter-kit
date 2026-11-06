@@ -27,7 +27,7 @@ class ContactMessageResource extends Resource
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-inbox';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Corporate';
+    protected static string|\UnitEnum|null $navigationGroup = 'Kurumsal';
 
     protected static ?string $modelLabel = 'Mesaj';
 

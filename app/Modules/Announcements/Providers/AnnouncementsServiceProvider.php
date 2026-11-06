@@ -27,7 +27,7 @@ class AnnouncementsServiceProvider extends ServiceProvider
             }
 
             foreach ($records as $record) {
-                yield ['loc' => $record->url(), 'lastmod' => $record->updated_at];
+                yield ['loc' => $record->url, 'lastmod' => $record->updated_at];
             }
         });
 
@@ -39,7 +39,7 @@ class AnnouncementsServiceProvider extends ServiceProvider
             ->get()
             ->map(fn (Announcement $announcement) => [
                 'title' => $announcement->title,
-                'url' => $announcement->url(),
+                'url' => $announcement->url,
                 'excerpt' => Str::limit(strip_tags($announcement->summary ?: (string) $announcement->body), 160),
             ]));
 

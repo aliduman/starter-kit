@@ -3,13 +3,15 @@
 namespace App\Modules\Media\Filament\Resources;
 
 use App\Filament\Concerns\ChecksPermission;
+use App\Filament\Forms\Components\RelationshipTagsInput;
+use App\Filament\Seo\SeoScoreColumn;
+use App\Filament\Seo\SeoSection;
 use App\Models\Category;
 use App\Modules\Media\Filament\Resources\ArticleResource\Pages;
 use App\Modules\Media\Models\Article;
 use Filament\Actions;
 use Filament\Forms;
 use Filament\Resources\Resource;
-use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -20,33 +22,32 @@ class ArticleResource extends Resource
 
     protected static ?string $model = Article::class;
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Media';
+    protected static ?string $modelLabel = 'Yazı';
+
+    protected static ?string $pluralModelLabel = 'Yazılar';
+
+    protected static string|\UnitEnum|null $navigationGroup = 'Medya';
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-newspaper';
 
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
-            Forms\Components\TextInput::make('title')->required(),
+            Forms\Components\TextInput::make('title')->label('Başlık')->required()->live(onBlur: true),
             Forms\Components\Select::make('category_id')
                 ->label('Kategori')
                 ->relationship('category', 'name', fn ($query) => $query->where('type', Article::CATEGORY_TYPE))
-                ->createOptionForm([Forms\Components\TextInput::make('name')->required()])
+                ->createOptionForm([Forms\Components\TextInput::make('name')->label('Ad')->required()])
                 ->createOptionUsing(fn (array $data) => Category::create([...$data, 'type' => Article::CATEGORY_TYPE])->getKey()),
-            Forms\Components\Select::make('tags')
+            RelationshipTagsInput::make('tags')
                 ->label('Etiketler')
                 ->relationship('tags', 'name')
-                ->multiple()
-                ->preload()
-                ->createOptionForm([Forms\Components\TextInput::make('name')->required()]),
-            Forms\Components\Textarea::make('excerpt')->rows(3),
-            Forms\Components\RichEditor::make('body')->columnSpanFull(),
-            Forms\Components\Toggle::make('is_published'),
-            Forms\Components\DateTimePicker::make('published_at'),
-            Section::make('SEO')->schema([
-                Forms\Components\TextInput::make('meta_title')->label('Meta başlık'),
-                Forms\Components\Textarea::make('meta_description')->label('Meta açıklama')->rows(2),
-            ])->collapsed(),
+                ->placeholder('Etiket yazıp Enter\'a basın'),
+            Forms\Components\Textarea::make('excerpt')->label('Özet')->rows(3)->live(onBlur: true),
+            Forms\Components\RichEditor::make('body')->label('Metin')->live(onBlur: true)->columnSpanFull(),
+            Forms\Components\Toggle::make('is_published')->label('Yayında'),
+            Forms\Components\DateTimePicker::make('published_at')->label('Yayın tarihi'),
+            SeoSection::make(),
         ]);
     }
 
@@ -54,10 +55,11 @@ class ArticleResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('title')->searchable(),
+                Tables\Columns\TextColumn::make('title')->label('Başlık')->searchable(),
                 Tables\Columns\TextColumn::make('category.name')->label('Kategori')->toggleable(),
-                Tables\Columns\IconColumn::make('is_published')->boolean(),
-                Tables\Columns\TextColumn::make('published_at')->dateTime(),
+                Tables\Columns\IconColumn::make('is_published')->label('Yayında')->boolean(),
+                Tables\Columns\TextColumn::make('published_at')->label('Yayın tarihi')->dateTime(),
+                SeoScoreColumn::make(),
             ])
             ->recordActions([
                 Actions\EditAction::make(),

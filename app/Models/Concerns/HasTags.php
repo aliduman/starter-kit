@@ -5,7 +5,7 @@ namespace App\Models\Concerns;
 use App\Models\Tag;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
-/** İçeriği ortak etiketlere bağlar (`taggables`); panelde Select::make('tags')->relationship('tags', 'name'). */
+/** İçeriği ortak etiketlere bağlar (`taggables`); panelde RelationshipTagsInput::make('tags')->relationship('tags', 'name'). */
 trait HasTags
 {
     public function tags(): MorphToMany

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\PhpVersionCheck;
 use App\Support\ResponseCache\ResponseCacheInvalidator;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -9,7 +10,8 @@ use Illuminate\Support\Facades\Artisan;
 use Throwable;
 
 /**
- * SSH'sız hostta deploy sonrası adım (CPANEL_DEPLOY.md): migrate, isteğe bağlı seed, storage:link, cache temizliği.
+ * SSH'sız hostta deploy sonrası adım (CPANEL_DEPLOY.md): PHP güvenlik sürümü uyarısı, migrate, isteğe bağlı seed,
+ * storage:link, cache temizliği.
  *
  * Güvenlik: SETUP_TOKEN boşsa (varsayılan) yok sayılır, 404 döner; token sabit zamanlı karşılaştırılır, istek dakikada
  * 5 ile sınırlıdır. Production'da seed yalnızca SETUP_ADMIN_EMAIL/SETUP_ADMIN_PASSWORD verilmişse admin oluşturur
@@ -26,7 +28,7 @@ class SetupController extends Controller
 
         abort_if($expected === '' || ! hash_equals($expected, $token), 404);
 
-        $output = [];
+        $output = [PhpVersionCheck::report()];
 
         Artisan::call('migrate', ['--force' => true]);
         $output[] = "== migrate ==\n".Artisan::output();

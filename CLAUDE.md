@@ -98,6 +98,25 @@ yet; when it does, these names and tables win.
   every gate. Panel access = any configured role.
 - Announcements module (`/duyurular`): publishable with `ends_at` (off the homepage block, still in the archive).
 - Admin image uploads use `filament/spatie-laravel-media-library-plugin` (same as Şahid).
+- Turkish UI (2026-11-05): nothing in the panel may fall back to English. Every form field, table column, filter and
+  custom action gets `->label('...')` (Filament otherwise shows the code name: `is_published` → "Is published"),
+  every resource sets `$modelLabel`/`$pluralModelLabel`, and navigation groups are Turkish. Laravel and package text
+  comes from `lang/tr` (`validation.php` `attributes` names fields that no panel form labels) and
+  `lang/vendor/{package}/tr` (lines Filament left missing or in English). The activity log names record types by
+  their resource (or the model's `$activityLabel`) and fields by their panel form label. `tests/Feature/TurkishUiTest.php`
+  (helper `tests/Support/UntranslatedPanelLabels.php`) fails on any of these; it is the same file in every site.
+- Editor speed (ported from Şahid 2026-11-06): every `RichEditor` has a sticky toolbar (`AdminPanelProvider::boot()`).
+  Name-based many-to-many fields such as tags use `App\Filament\Forms\Components\RelationshipTagsInput::make('tags')
+  ->relationship('tags', 'name')`: Enter or comma completes a tag, existing names are suggested, new ones are created
+  on save. Use it instead of a multiple `Select` with a create form.
+- SEO analysis (ported from Şahid 2026-11-02): `App\Filament\Seo\SeoSection::make(imageField:, fields:)` (`imageField` may list
+  several uploads in priority order; `fields` adds site-specific SEO inputs) replaces a form's
+  SEO section (focus keyword, meta fields, Google preview, live findings, 0–100 score); `SeoScoreColumn` shows the
+  score in lists. Models opt in with `SeoAnalyzable` + `HasSeoAnalysis` (`seoSubject()` mirrors the public page's
+  title/description/image rules, needs a `url` accessor and a `focus_keyword` column). Checks are classes in
+  `config/seo.php` `analysis.checks` (`App\Support\Seo\Analysis\Checks`); keyword checks implement
+  `RequiresKeyword`. Wired for Media articles, Corporate pages and Announcements. Fields that feed the analysis are
+  `live(onBlur: true)`. Categories and people have meta fields but no public page uses them yet, so they have no panel.
 
 Starter-kit-only pieces that Şahid lacks and are worth keeping: Breeze-style auth (`app/Http/Controllers/Auth`,
 `routes/auth.php`, `Pages/Auth`), an SSR entry (`resources/js/ssr.js`, `npm run build:ssr`), Ziggy (`@routes` +

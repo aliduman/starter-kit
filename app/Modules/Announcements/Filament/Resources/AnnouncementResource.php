@@ -3,6 +3,8 @@
 namespace App\Modules\Announcements\Filament\Resources;
 
 use App\Filament\Concerns\ChecksPermission;
+use App\Filament\Seo\SeoScoreColumn;
+use App\Filament\Seo\SeoSection;
 use App\Modules\Announcements\Filament\Resources\AnnouncementResource\Pages\CreateAnnouncement;
 use App\Modules\Announcements\Filament\Resources\AnnouncementResource\Pages\EditAnnouncement;
 use App\Modules\Announcements\Filament\Resources\AnnouncementResource\Pages\ListAnnouncements;
@@ -22,6 +24,7 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class AnnouncementResource extends Resource
 {
@@ -43,11 +46,11 @@ class AnnouncementResource extends Resource
     {
         return $schema->components([
             Section::make()->schema([
-                TextInput::make('title')->label('Başlık')->required()->maxLength(255),
-                TextInput::make('slug')->label('Adres')->helperText('Boş bırakılırsa başlıktan üretilir.'),
-                Textarea::make('summary')->label('Özet')->rows(3)->columnSpanFull(),
-                RichEditor::make('body')->label('İçerik')->columnSpanFull(),
-                SpatieMediaLibraryFileUpload::make('cover')->label('Kapak görseli')->collection('cover')->image(),
+                TextInput::make('title')->label('Başlık')->required()->maxLength(255)->live(onBlur: true),
+                TextInput::make('slug')->label('Adres')->helperText('Boş bırakılırsa başlıktan üretilir.')->live(onBlur: true),
+                Textarea::make('summary')->label('Özet')->rows(3)->live(onBlur: true)->columnSpanFull(),
+                RichEditor::make('body')->label('İçerik')->live(onBlur: true)->columnSpanFull(),
+                SpatieMediaLibraryFileUpload::make('cover')->label('Kapak görseli')->collection('cover')->image()->live(),
                 TextInput::make('link')->label('Bağlantı')->url(),
                 TextInput::make('button_text')->label('Buton yazısı'),
             ])->columns(2),
@@ -56,10 +59,7 @@ class AnnouncementResource extends Resource
                 DateTimePicker::make('published_at')->label('Yayın tarihi')->helperText('İleri bir tarih seçilirse o an yayına girer.'),
                 DateTimePicker::make('ends_at')->label('Ana sayfadan kalkış')->helperText('Boşsa süresiz. Duyuru arşivde kalır.'),
             ])->columns(3),
-            Section::make('SEO')->schema([
-                TextInput::make('meta_title')->label('Meta başlık'),
-                Textarea::make('meta_description')->label('Meta açıklama')->rows(2),
-            ])->collapsed(),
+            SeoSection::make(imageField: 'cover'),
         ]);
     }
 
@@ -71,7 +71,10 @@ class AnnouncementResource extends Resource
                 IconColumn::make('is_published')->label('Yayında')->boolean(),
                 TextColumn::make('published_at')->label('Yayın')->dateTime('d.m.Y H:i')->sortable(),
                 TextColumn::make('ends_at')->label('Bitiş')->dateTime('d.m.Y H:i')->placeholder('—'),
+                SeoScoreColumn::make(),
             ])
+            // SEO puanı kapak görselinin ölçüsüne bakar.
+            ->modifyQueryUsing(fn (Builder $query) => $query->with('media'))
             ->filters([
                 TernaryFilter::make('is_published')->label('Yayında'),
             ])

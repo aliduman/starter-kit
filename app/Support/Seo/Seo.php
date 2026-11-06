@@ -228,6 +228,18 @@ class Seo
         return ['@id' => url('/').'#organization'];
     }
 
+    /** Sayfanın arama sonucundaki tam başlığı (site adıyla). */
+    public function pageTitle(?string $title): string
+    {
+        return $this->fullTitle($title, (string) $this->defaults()['site_name']);
+    }
+
+    /** Açıklama etiketine yazılacak hali: düz metin, 160 karaktere kısaltılmış. */
+    public function description(?string $text): ?string
+    {
+        return $this->plain($text);
+    }
+
     private function fullTitle(?string $title, string $siteName): string
     {
         $title = trim((string) $title);

@@ -3,17 +3,20 @@
 namespace App\Providers\Filament;
 
 use App\Support\Modules;
+use Filament\Forms\Components\RichEditor;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Panel;
 use Filament\PanelProvider;
+use Filament\Resources\Resource;
 use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Support\Colors\Color;
 use Filament\Tables\Table;
+use Filament\View\PanelsRenderHook;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -30,6 +33,12 @@ class AdminPanelProvider extends PanelProvider
         Grid::configureUsing(fn (Grid $grid) => $grid->columnSpanFull());
         Fieldset::configureUsing(fn (Fieldset $fieldset) => $fieldset->columnSpanFull());
         Table::configureUsing(fn (Table $table) => $table->deferFilters(false));
+
+        // Uzun yazılarda araç çubuğu üst çubuğun altında sabit kalır; yazar her biçimlendirmede yukarı kaydırmaz.
+        RichEditor::configureUsing(fn (RichEditor $editor) => $editor->stickyToolbar());
+
+        // Kaynak adları yazıldığı gibi görünür; Filament menüde ve başlıkta her kelimeyi büyütür ("Ayet Ve Hadis").
+        Resource::titleCaseModelLabel(false);
     }
 
     public function panel(Panel $panel): Panel
@@ -58,7 +67,9 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-            ]);
+            ])
+            // Livewire'ın oturum süresi dolunca gösterdiği onay metni İngilizce ve sabit; çevrilebilir olanıyla değiştirilir.
+            ->renderHook(PanelsRenderHook::SCRIPTS_AFTER, fn (): string => view('filament.session-expired')->render());
 
         // Only enabled modules contribute admin resources, pages and widgets.
         foreach (Modules::enabled() as $module) {

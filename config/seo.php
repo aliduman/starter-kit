@@ -112,4 +112,47 @@ return [
         'ga4' => env('SEO_GA4_ID'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Content analysis
+    |--------------------------------------------------------------------------
+    |
+    | The Yoast-like analysis shown while editing content in the admin panel
+    | (App\Support\Seo\Analysis). `checks` run in order; a site may add its own
+    | (extend SeoCheck) or drop some. Lengths are characters, `title` counts
+    | the full title with the site name. `image.ratio` is the frame the public
+    | site crops covers into (16:9).
+    |
+    */
+
+    'analysis' => [
+        'checks' => [
+            \App\Support\Seo\Analysis\Checks\FocusKeyword::class,
+            \App\Support\Seo\Analysis\Checks\TitleLength::class,
+            \App\Support\Seo\Analysis\Checks\DescriptionLength::class,
+            \App\Support\Seo\Analysis\Checks\KeywordInTitle::class,
+            \App\Support\Seo\Analysis\Checks\KeywordInDescription::class,
+            \App\Support\Seo\Analysis\Checks\KeywordInSlug::class,
+            \App\Support\Seo\Analysis\Checks\KeywordInIntro::class,
+            \App\Support\Seo\Analysis\Checks\KeywordInSubheadings::class,
+            \App\Support\Seo\Analysis\Checks\KeywordDensity::class,
+            \App\Support\Seo\Analysis\Checks\KeywordUnique::class,
+            \App\Support\Seo\Analysis\Checks\ContentLength::class,
+            \App\Support\Seo\Analysis\Checks\Subheadings::class,
+            \App\Support\Seo\Analysis\Checks\Readability::class,
+            \App\Support\Seo\Analysis\Checks\ImageAlt::class,
+            \App\Support\Seo\Analysis\Checks\InternalLinks::class,
+            \App\Support\Seo\Analysis\Checks\ExternalLinks::class,
+            \App\Support\Seo\Analysis\Checks\CoverImage::class,
+            \App\Support\Seo\Analysis\Checks\SlugLength::class,
+        ],
+        'title' => ['min' => 30, 'max' => 60],
+        'description' => ['min' => 120, 'max' => 160],
+        'keyword_density' => ['min' => 0.5, 'max' => 3.0],
+        'min_words' => 300,
+        'slug_max' => 75,
+        'image' => ['min_width' => 1280, 'ratio' => 16 / 9, 'tolerance' => 0.12, 'recommended' => '1600×900'],
+        'score' => ['good' => 75, 'ok' => 45],
+    ],
+
 ];

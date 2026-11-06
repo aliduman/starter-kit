@@ -33,6 +33,19 @@ it('migrates and clears caches with the right token', function () {
         ->assertHeader('X-Robots-Tag', 'noindex, nofollow');
 });
 
+it('reports first whether the running PHP is patched', function () {
+    config([
+        'app.setup_token' => 'dogru-token',
+        'app.php_security_minimums' => [PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION => '99.0.0'],
+    ]);
+    Artisan::shouldReceive('call')->withAnyArgs();
+    Artisan::shouldReceive('output')->andReturn('');
+
+    get('/kurulum/dogru-token')
+        ->assertOk()
+        ->assertSeeInOrder(['UYARI: PHP', 'en az 99.0.0', '== migrate ==']);
+});
+
 it('runs extra seeders named in config outside production', function () {
     config(['app.setup_token' => 'dogru-token', 'app.setup_seeders' => ['demo' => DatabaseSeeder::class]]);
     Artisan::shouldReceive('call')->with('db:seed', ['--class' => DatabaseSeeder::class, '--force' => true])->once();

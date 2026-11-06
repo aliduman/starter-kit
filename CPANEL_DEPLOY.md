@@ -8,7 +8,7 @@ Hazır sürüm paketi (zip) panelden yüklenip **Ayıkla** ile açılır, ardın
 
 | Bileşen | Gereksinim |
 |---|---|
-| PHP | **≥ 8.4** (cPanel MultiPHP). Eklentiler: `mbstring pdo_mysql intl gd zip bcmath exif fileinfo` |
+| PHP | **≥ 8.4** (cPanel MultiPHP), dalın güncel güvenlik sürümüyle (`config/app.php` → `php_security_minimums`; `/kurulum` eskiyse uyarır). Eklentiler: `mbstring pdo_mysql intl gd zip bcmath exif fileinfo` |
 | MySQL | 8.0, `utf8mb4`. Tablolar her zaman InnoDB açılır (`config/database.php`), sunucu varsayılanı MyISAM olsa da. |
 | Cron Jobs | `schedule:run` için gerekli |
 | Dosya yönetimi | cPanel File Manager: yükleme (Upload / Karşıya yükle) ve zip açma (Extract / Ayıkla) |
@@ -46,6 +46,7 @@ Paketi almanın iki yolu var:
   ```
 
   Çıktı: projenin bir üst klasöründe `<klasör-adı>-release-<sha>.zip` (adı `RELEASE_NAME` ile değiştirilebilir).
+  Aynı klasördeki önceki `-release-` paketleri silinir; elde yalnızca son sürüm kalır.
   Belirli bir commit ve klasör için: `scripts/build-release.sh <commit> <klasör>`.
 
 ## Her deploy
