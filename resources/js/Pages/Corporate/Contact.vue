@@ -3,12 +3,14 @@ import { useForm, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import PageHero from '~corporate/PageHero.vue';
 import HoneypotField from '~shared/HoneypotField.vue';
+import Icon from '~shared/Icon.vue';
 
 const props = defineProps({
     subjects: { type: Object, default: () => ({}) },
 });
 
 const settings = computed(() => usePage().props.settings || {});
+const whatsapp = computed(() => (settings.value.contact_whatsapp || '').replace(/\D/g, ''));
 
 const form = useForm({
     name: '',
@@ -41,6 +43,12 @@ const submit = () => form.post(route('corporate.contact.store'), {
             <div v-if="settings.contact_phone" class="card">
                 <h3 class="font-semibold">Telefon</h3>
                 <p class="mt-1 text-sm text-slate-600">{{ settings.contact_phone }}</p>
+            </div>
+            <div v-if="whatsapp" class="card">
+                <h3 class="font-semibold">WhatsApp</h3>
+                <a :href="`https://wa.me/${whatsapp}`" target="_blank" rel="noopener" class="mt-1 inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900">
+                    <Icon name="whatsapp" class="size-4 text-[#1f8f5a]" />{{ settings.contact_whatsapp }}
+                </a>
             </div>
         </div>
 

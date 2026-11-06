@@ -4,6 +4,7 @@ import { computed } from 'vue';
 import NavBar from '~shared/NavBar.vue';
 import CookieConsent from '~shared/CookieConsent.vue';
 import AudioBar from '~shared/AudioBar.vue';
+import WhatsAppButton from '~shared/WhatsAppButton.vue';
 import { usePlayerStore } from '@/Stores/player';
 import { hasTrackers, preferencesOpen } from '@/analytics';
 
@@ -43,6 +44,7 @@ const openCookiePreferences = () => {
             </div>
         </footer>
 
+        <WhatsAppButton :raised="!!player.track" />
         <AudioBar />
         <CookieConsent />
     </div>

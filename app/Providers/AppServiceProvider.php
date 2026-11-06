@@ -82,6 +82,7 @@ class AppServiceProvider extends ServiceProvider
                 'privacy_url' => ['label' => 'Aydınlatma metni adresi (KVKK)', 'public' => true, 'help' => 'Formlardaki onay kutusu bu sayfaya bağlanır.'],
                 'contact_email' => ['label' => 'E-posta', 'group' => 'contact', 'type' => 'email', 'public' => true],
                 'contact_phone' => ['label' => 'Telefon', 'group' => 'contact', 'public' => true],
+                'contact_whatsapp' => ['label' => 'WhatsApp numarası', 'group' => 'contact', 'public' => true, 'help' => 'Ör. +90 5xx xxx xx xx. Doluysa her sayfada WhatsApp düğmesi çıkar.'],
                 'contact_address' => ['label' => 'Adres', 'group' => 'contact', 'type' => 'textarea', 'public' => true],
                 'social_instagram' => ['label' => 'Instagram', 'group' => 'social', 'type' => 'url', 'public' => true],
                 'social_youtube' => ['label' => 'YouTube', 'group' => 'social', 'type' => 'url', 'public' => true],
